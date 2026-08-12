@@ -16,5 +16,6 @@ Run the complete local gate with:
 pnpm verify
 ```
 
-The site is built as static files and deployed to Cloudflare Pages from the
-`shrek` branch. Production is available at [suzumushi.org](https://suzumushi.org).
+The site is built as static files and automatically deployed to Cloudflare Pages
+after pushes to the `shrek` branch. Production is available at
+[suzumushi.org](https://suzumushi.org).
