@@ -1,0 +1,22 @@
+---
+import { Image } from "astro:assets";
+import suzu from "../assets/suzu.png";
+---
+
+<figure class="mx-auto w-full max-w-[30rem]">
+  <div class="aspect-[4/5] border-l border-line pl-5 sm:pl-8">
+    <Image
+      src={suzu}
+      alt="Suzu, a bell cricket cut from charcoal and ivory Japanese paper, holding a small brass bell"
+      widths={[420, 640, 900]}
+      sizes="(max-width: 1024px) 80vw, 30rem"
+      loading="eager"
+      fetchpriority="high"
+      class="h-full w-full object-contain"
+    />
+  </div>
+  <figcaption class="mt-4 flex items-center justify-between gap-4 border-t border-line pt-3 font-mono text-[0.62rem] tracking-[0.12em] text-soft uppercase">
+    <span>Suzu</span>
+    <span>bell cricket</span>
+  </figcaption>
+</figure>

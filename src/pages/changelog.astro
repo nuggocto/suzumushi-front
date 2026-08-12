@@ -1,0 +1,94 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ButtonLink from "../components/ButtonLink.astro";
+import { SITE } from "../data/site";
+
+const releases = [
+  {
+    version: "1.0.0",
+    date: "12 August 2026",
+    label: "Stable",
+    summary: "The complete local player, release pipeline, and Arch package.",
+    changes: [
+      "Published the verified suzumushi-bin package to AUR.",
+      "Added session-only Library folder collapse without hiding search results or changing playback.",
+      "Made Enter play or pause outside Library and clarified previous and next controls.",
+      "Prevented the same underlying audio asset from entering the Queue twice while keeping playlist additions atomic.",
+      "Cleared informational footer notices after three seconds while preserving warnings and errors.",
+    ],
+  },
+  {
+    version: "0.4.0",
+    date: "10 August 2026",
+    label: "Desktop",
+    summary: "The terminal player learned to speak to the Linux desktop.",
+    changes: [
+      "Added MPRIS, global media keys, playerctl controls, and bounded metadata.",
+      "Finished the built-in key guide, failure states, and installed-binary QA.",
+      "Kept desktop actions routed through the same app-owned playback state.",
+    ],
+  },
+  {
+    version: "0.3.0",
+    date: "10 August 2026",
+    label: "Playback",
+    summary: "Folders became a library, and Suzu began to dance.",
+    changes: [
+      "Added the nested library, folder playlists, local search, and bounded Queue.",
+      "Added MP3, FLAC, WAV/PCM, and Ogg/Vorbis playback with seeking, shuffle, and repeat.",
+      "Added paused session restoration and the original terminal-native Suzu animation.",
+    ],
+  },
+  {
+    version: "0.2.0",
+    date: "10 August 2026",
+    label: "Foundation",
+    summary: "The safe local foundation and terminal shell arrived.",
+    changes: [
+      "Added strict root initialization, descriptor-relative scanning, private logs, and bounded parsing.",
+      "Added the keyboard-first terminal interface and the canonical suzumushi command.",
+      "Established the complete CI, security, MSRV, and fuzzing gates.",
+    ],
+  },
+] as const;
+---
+
+<Layout title="Changelog" description="The Suzumushi release history, from its safe foundation to version 1.0.0.">
+  <section class="shell pt-20 pb-10 sm:pt-28">
+    <p class="eyebrow">Release notes</p>
+    <h1 class="display-title mt-6 text-5xl leading-[0.98] sm:text-7xl">Small steps.<br />Quietly shipped.</h1>
+    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted">A short record of what changed, and when it became ready.</p>
+  </section>
+
+  <section class="shell pb-24">
+    <div class="relative mt-8">
+      <div class="absolute top-0 bottom-0 left-[0.34rem] w-px bg-line sm:left-[8.45rem]"></div>
+      <div class="grid gap-12">
+        {releases.map((release, index) => (
+          <article class="relative grid gap-4 pl-8 sm:grid-cols-[7.2rem_1fr] sm:gap-10 sm:pl-0">
+            <div class="sm:text-right">
+              <div class:list={["absolute top-2 left-0 size-3 border-2 border-night sm:left-[8.1rem]", index === 0 ? "bg-accent" : "bg-soft"]}></div>
+              <p class="font-mono text-xs text-ink">v{release.version}</p>
+              <p class="mt-1 font-mono text-[0.6rem] leading-relaxed text-soft">{release.date}</p>
+            </div>
+            <div class="panel p-6 sm:p-8">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="font-display text-3xl text-ink">{release.label}</h2>
+                {index === 0 && <span class="border border-line px-3 py-1 font-mono text-[0.6rem] text-muted">current</span>}
+              </div>
+              <p class="mt-3 text-muted">{release.summary}</p>
+              <ul class="mt-6 grid gap-3 text-sm leading-relaxed text-muted">
+                {release.changes.map((change) => <li class="flex gap-3"><span class="mt-[0.65rem] size-1 shrink-0 bg-accent"></span><span>{change}</span></li>)}
+              </ul>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-16 flex flex-wrap items-center justify-center gap-3">
+      <ButtonLink href={SITE.release} external>Read the v{SITE.version} release ↗</ButtonLink>
+      <ButtonLink href={`${SITE.github}/blob/shrek/CHANGELOG.md`} variant="secondary" external>Complete changelog ↗</ButtonLink>
+    </div>
+  </section>
+</Layout>

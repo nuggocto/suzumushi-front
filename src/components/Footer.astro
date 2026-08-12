@@ -1,0 +1,26 @@
+---
+import LogoMark from "./LogoMark.astro";
+import { NAV, SITE } from "../data/site";
+---
+
+<footer class="border-t border-line py-10">
+  <div class="shell grid gap-8 sm:grid-cols-[1fr_auto] sm:items-end">
+    <div>
+      <a href="/" class="inline-flex items-center gap-3 no-underline">
+        <span class="block size-9"><LogoMark /></span>
+        <span class="font-display text-lg text-ink">Suzumushi</span>
+      </a>
+      <p class="mt-4 max-w-md text-sm leading-relaxed text-muted">
+        A local terminal player for Linux. Your files stay where you left them.
+      </p>
+    </div>
+    <div class="sm:text-right">
+      <nav class="flex flex-wrap gap-x-5 gap-y-2 sm:justify-end" aria-label="Footer navigation">
+        {NAV.map((item) => <a class="mono-link" href={item.href}>{item.label}</a>)}
+        <a class="mono-link" href={SITE.github}>GitHub ↗</a>
+        <a class="mono-link" href={SITE.license}>Apache-2.0 ↗</a>
+      </nav>
+      <p class="mt-4 font-mono text-[0.65rem] tracking-wide text-soft">Made quietly for the terminal.</p>
+    </div>
+  </div>
+</footer>

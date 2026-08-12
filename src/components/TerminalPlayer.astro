@@ -1,0 +1,66 @@
+---
+import { Image } from "astro:assets";
+import player from "../assets/player.png";
+---
+
+<figure id="player" class="terminal-figure">
+  <div class="terminal-heading" aria-hidden="true">
+    <span>suzumushi</span>
+    <span>real playing state</span>
+  </div>
+
+  <div
+    class="terminal-viewport"
+    tabindex="0"
+    role="region"
+    aria-label="Suzumushi interface screenshot, horizontally scrollable on small screens"
+  >
+    <Image
+      src={player}
+      alt="Suzumushi playing Mani - Bang Bang, with the folder library on the left, Suzu dancing in the player, and the queue on the right"
+      widths={[720, 1120, 1600, 2240]}
+      sizes="(max-width: 720px) 50rem, 70rem"
+      format="png"
+      loading="lazy"
+      class="terminal-image"
+    />
+  </div>
+</figure>
+
+<style>
+  .terminal-figure {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: #0e1214;
+  }
+
+  .terminal-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    padding: 0.7rem 0.9rem;
+    color: var(--soft);
+    font: 400 0.62rem var(--font-mono);
+    letter-spacing: 0.08em;
+  }
+
+  .terminal-viewport {
+    overflow-x: auto;
+    padding: clamp(0.3rem, 0.7vw, 0.55rem);
+    scrollbar-color: var(--accent) var(--panel);
+  }
+
+  .terminal-image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 720px) {
+    .terminal-image {
+      width: 50rem;
+      max-width: none;
+    }
+  }
+</style>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://suzumushi.org/sitemap-index.xml

@@ -1,0 +1,84 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ButtonLink from "../components/ButtonLink.astro";
+import CommandBlock from "../components/CommandBlock.astro";
+import { RELEASE, SITE } from "../data/site";
+
+const curlCommand = `curl -fLO \\
+  '${RELEASE.baseUrl}/{SHA256SUMS,${RELEASE.archive}}'`;
+const installCommand = `sha256sum --check --ignore-missing SHA256SUMS
+tar -xf ${RELEASE.archive}
+cd ${RELEASE.archive.replace(".tar.xz", "")}
+sudo install -Dm755 suzumushi /usr/local/bin/suzumushi
+sudo ln -s suzumushi /usr/local/bin/suzu`;
+---
+
+<Layout title="Install" description="Install the verified Suzumushi terminal audio player for Linux.">
+  <section class="shell pt-20 pb-12 sm:pt-28">
+    <p class="eyebrow">Install</p>
+    <h1 class="display-title mt-6 max-w-4xl text-5xl leading-[0.98] sm:text-7xl">A short path<br />to the first song.</h1>
+    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+      Suzumushi supports 64-bit GNU/Linux. Each archive is checksummed before publication. The AUR package uses that same release.
+    </p>
+  </section>
+
+  <section class="shell pb-24">
+    <div class="grid gap-5 lg:grid-cols-2">
+      <article class="panel p-6 sm:p-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="font-mono text-[0.66rem] tracking-[0.15em] text-accent uppercase">Arch Linux</p>
+            <h2 class="mt-3 font-display text-3xl text-ink">Install from AUR</h2>
+          </div>
+          <span class="border border-line px-3 py-1 font-mono text-[0.6rem] text-muted">recommended</span>
+        </div>
+        <p class="mt-4 text-sm leading-relaxed text-muted">The package provides the canonical <code class="font-mono text-ink">suzumushi</code> command and the relative <code class="font-mono text-ink">suzu</code> symlink.</p>
+        <div class="mt-6"><CommandBlock command="yay -S suzumushi-bin" /></div>
+        <ButtonLink href={SITE.aur} variant="secondary" external class="mt-6">Open the AUR package ↗</ButtonLink>
+      </article>
+
+      <article class="panel p-6 sm:p-8">
+        <p class="font-mono text-[0.66rem] tracking-[0.15em] text-accent uppercase">GNU/Linux x86-64</p>
+        <h2 class="mt-3 font-display text-3xl text-ink">Install the archive</h2>
+        <p class="mt-4 text-sm leading-relaxed text-muted">Download the archive and checksum. Install only after verification reports <code class="font-mono text-ink">OK</code>.</p>
+        <div class="mt-6"><CommandBlock command={curlCommand} label="Download" /></div>
+      </article>
+    </div>
+
+    <div class="mt-5 panel p-6 sm:p-8">
+      <div class="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+        <div class="min-w-0">
+          <p class="font-mono text-[0.66rem] tracking-[0.15em] text-accent uppercase">Verify, then install</p>
+          <h2 class="mt-3 font-display text-3xl text-ink">Check the archive before it enters the path.</h2>
+          <p class="mt-4 text-sm leading-relaxed text-muted">The expected archive SHA-256 for v{SITE.version} is:</p>
+          <p class="mt-3 break-all font-mono text-[0.66rem] leading-relaxed text-ink">{RELEASE.checksum}</p>
+        </div>
+        <div class="min-w-0"><CommandBlock command={installCommand} /></div>
+      </div>
+    </div>
+
+    <div class="prose mx-auto mt-20 max-w-3xl" id="first-library">
+      <p class="eyebrow">First run</p>
+      <h2>Give the library a home</h2>
+      <p>Initialize a root, add audio below <code>audio/library/</code>, then open the player. Root discovery stays explicit: <code>--root</code>, then <code>SUZUMUSHI_ROOT</code>, then an existing local <code>./suzumushi/audio</code>.</p>
+      <CommandBlock command={`suzumushi init ./suzumushi
+# Add audio below ./suzumushi/audio/library/
+suzumushi --root ./suzumushi`} />
+
+      <h2>Build from source</h2>
+      <p>You need Rust 1.95 or newer and the ALSA development package for your distribution.</p>
+      <ul>
+        <li>Arch Linux: <code>alsa-lib</code></li>
+        <li>Debian or Ubuntu: <code>libasound2-dev</code></li>
+        <li>Fedora: <code>alsa-lib-devel</code></li>
+      </ul>
+      <CommandBlock command={`git clone https://github.com/nuggocto/suzumushi.git
+cd suzumushi
+cargo install --path . --locked`} />
+
+      <h2>Audio support</h2>
+      <p>The verified formats are MP3 with MPEG Layer III, FLAC, signed 16-bit PCM WAV, and Ogg with Vorbis. Mono and stereo audio from 8 kHz through 192 kHz is supported when the default device accepts the source rate.</p>
+      <p>AAC, M4A, Opus, multichannel audio, and automatic resampling are not current support claims.</p>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,33 @@
+---
+import LogoMark from "./LogoMark.astro";
+import { NAV, SITE } from "../data/site";
+---
+
+<header class="sticky top-0 z-50 border-b border-line bg-night/95 backdrop-blur-md">
+  <div class="shell flex h-[4.4rem] items-center justify-between gap-5">
+    <a href="/" class="flex items-center gap-3 no-underline" aria-label="Suzumushi home">
+      <span class="block size-9"><LogoMark /></span>
+      <span>
+        <span class="block font-display text-lg leading-none tracking-[-0.02em] text-ink">Suzumushi</span>
+        <span class="mt-1 block font-mono text-[0.58rem] tracking-[0.12em] text-soft uppercase">local terminal audio</span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-6 md:flex" aria-label="Primary navigation">
+      {NAV.map((item) => <a class="mono-link" href={item.href}>{item.label}</a>)}
+      <a class="mono-link text-ink" href={SITE.github} target="_blank" rel="noreferrer">GitHub ↗</a>
+    </nav>
+
+    <details class="group relative md:hidden">
+      <summary class="flex size-10 cursor-pointer list-none items-center justify-center border border-line bg-panel text-ink marker:content-none" aria-label="Open navigation">
+        <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </summary>
+      <nav class="panel absolute top-12 right-0 w-52 p-2" aria-label="Mobile navigation">
+        {NAV.map((item) => <a class="block px-3 py-2.5 font-mono text-xs text-muted no-underline hover:bg-panel-high hover:text-ink" href={item.href}>{item.label}</a>)}
+        <a class="mt-1 block border-t border-line px-3 py-2.5 font-mono text-xs text-ink no-underline" href={SITE.github} target="_blank" rel="noreferrer">GitHub ↗</a>
+      </nav>
+    </details>
+  </div>
+</header>

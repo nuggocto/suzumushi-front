@@ -1,0 +1,100 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ButtonLink from "../components/ButtonLink.astro";
+import SuzuStage from "../components/SuzuStage.astro";
+import TerminalPlayer from "../components/TerminalPlayer.astro";
+import { SITE } from "../data/site";
+
+const principles = [
+  {
+    number: "01",
+    title: "Files, not a catalog.",
+    description:
+      "Your folders are the library. Music, long listens, D&D sessions, and playlists remain ordinary files on disk.",
+  },
+  {
+    number: "02",
+    title: "A queue that waits.",
+    description:
+      "Add a track or a whole playlist. Suzumushi remembers the queue and your place, then returns paused.",
+  },
+  {
+    number: "03",
+    title: "At home on Linux.",
+    description:
+      "MPRIS and media keys control the same player. Nothing is copied to an account, service, or cloud.",
+  },
+] as const;
+---
+
+<Layout>
+  <section class="shell grid min-h-[calc(100svh-4.4rem)] items-center gap-12 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
+    <div class="text-center lg:text-left">
+      <p class="eyebrow">A local player for Linux</p>
+      <h1 class="display-title mt-6 text-[clamp(3.4rem,7vw,6.7rem)] leading-[0.92]">
+        Keep your<br />music close.
+      </h1>
+      <p class="mx-auto mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg lg:mx-0">
+        Suzumushi plays the files already on your machine. No account. No import. Open the terminal and listen.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
+        <ButtonLink href="/install">Install Suzumushi</ButtonLink>
+        <ButtonLink href={SITE.github} variant="secondary" external>View source ↗</ButtonLink>
+      </div>
+      <p class="mt-7 font-mono text-[0.62rem] leading-relaxed tracking-[0.1em] text-soft uppercase">
+        MP3 · FLAC · WAV/PCM · Ogg/Vorbis · Apache-2.0
+      </p>
+    </div>
+    <SuzuStage />
+  </section>
+
+  <section class="border-y border-line">
+    <div class="section shell">
+      <div class="section-label">The player</div>
+      <div class="mb-10 grid gap-5 lg:grid-cols-2 lg:items-end">
+        <h2 class="display-title text-4xl leading-tight sm:text-5xl">Three panels.<br />Nothing else.</h2>
+        <p class="max-w-lg leading-relaxed text-muted lg:justify-self-end">
+          The library on the left. The song in the middle. The queue on the right. Every important key stays in view.
+        </p>
+      </div>
+      <TerminalPlayer />
+    </div>
+  </section>
+
+  <section class="section shell" aria-labelledby="principles-title">
+    <div class="section-label">Built to stay small</div>
+    <div class="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
+      <div>
+        <h2 id="principles-title" class="display-title text-4xl leading-tight sm:text-5xl">Only what the music needs.</h2>
+        <p class="mt-5 max-w-sm leading-relaxed text-muted">
+          Local playback, a clear queue, and a quiet way back to where you stopped.
+        </p>
+      </div>
+      <div class="border-t border-line">
+        {principles.map((principle) => (
+          <article class="grid gap-3 border-b border-line py-6 sm:grid-cols-[3rem_0.72fr_1.28fr] sm:gap-5">
+            <span class="font-mono text-[0.65rem] text-accent">{principle.number}</span>
+            <h3 class="font-display text-xl text-ink">{principle.title}</h3>
+            <p class="text-sm leading-relaxed text-muted">{principle.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="shell pb-20 sm:pb-28">
+    <div class="border-t border-line pt-10 sm:flex sm:items-end sm:justify-between sm:gap-10">
+      <div>
+        <p class="eyebrow">Install</p>
+        <h2 class="display-title mt-4 text-4xl sm:text-5xl">Bring one folder. Press play.</h2>
+        <p class="mt-4 max-w-xl leading-relaxed text-muted">
+          Install the verified Linux release, choose a root, and leave the rest untouched.
+        </p>
+      </div>
+      <div class="mt-7 flex shrink-0 flex-wrap gap-3 sm:mt-0">
+        <ButtonLink href="/install">Install for Linux</ButtonLink>
+        <ButtonLink href={SITE.aur} variant="secondary" external>AUR ↗</ButtonLink>
+      </div>
+    </div>
+  </section>
+</Layout>
