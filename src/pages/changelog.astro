@@ -5,6 +5,17 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.0.1",
+    date: "12 August 2026",
+    label: "Spectrum",
+    summary: "The Player learned to follow the shape of the sound.",
+    changes: [
+      "Added a compact, dependency-free 16-band spectrum driven by the audio reaching the output device.",
+      "Kept stereo-width and opposite-polarity audio visible by combining independently filtered channel energy.",
+      "Made the spectrum fall quiet immediately when playback pauses or stops.",
+    ],
+  },
+  {
     version: "1.0.0",
     date: "12 August 2026",
     label: "Stable",
@@ -53,7 +64,7 @@ const releases = [
 ] as const;
 ---
 
-<Layout title="Changelog" description="The Suzumushi release history, from its safe foundation to version 1.0.0.">
+<Layout title="Changelog" description="The Suzumushi release history, from its safe foundation to version 1.0.1.">
   <section class="shell pt-20 pb-10 sm:pt-28">
     <p class="eyebrow">Release notes</p>
     <h1 class="display-title mt-6 text-5xl leading-[0.98] sm:text-7xl">Small steps.<br />Quietly shipped.</h1>
