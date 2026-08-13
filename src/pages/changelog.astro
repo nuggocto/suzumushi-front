@@ -5,6 +5,18 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.0.2",
+    date: "13 August 2026",
+    label: "Polish",
+    summary: "The finished player got a leaner, stricter release.",
+    changes: [
+      "Made hard-linked paths share one verified asset, metadata parse, and Queue identity.",
+      "Removed temporary allocations from natural path sorting and reduced the release binary size.",
+      "Replaced metadata-helper sleep polling with Linux process-descriptor notification when available.",
+      "Added clean-checkout fuzz seeds and disabled Cargo publication for the application crate.",
+    ],
+  },
+  {
     version: "1.0.1",
     date: "12 August 2026",
     label: "Spectrum",
@@ -64,7 +76,7 @@ const releases = [
 ] as const;
 ---
 
-<Layout title="Changelog" description="The Suzumushi release history, from its safe foundation to version 1.0.1.">
+<Layout title="Changelog" description="The Suzumushi release history, from its safe foundation to version 1.0.2.">
   <section class="shell pt-20 pb-10 sm:pt-28">
     <p class="eyebrow">Release notes</p>
     <h1 class="display-title mt-6 text-5xl leading-[0.98] sm:text-7xl">Small steps.<br />Quietly shipped.</h1>
