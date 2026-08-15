@@ -10,10 +10,10 @@ import player from "../assets/player.png";
   </div>
 
   <div
-    class="terminal-viewport"
+    class="terminal-viewport desktop-player"
     tabindex="0"
     role="region"
-    aria-label="Suzumushi interface screenshot, horizontally scrollable on small screens"
+    aria-label="Suzumushi interface screenshot"
   >
     <Image
       src={player}
@@ -24,6 +24,38 @@ import player from "../assets/player.png";
       loading="lazy"
       class="terminal-image"
     />
+  </div>
+
+  <div class="mobile-panels" role="list" aria-label="Suzumushi interface panels">
+    <figure class="mobile-panel" role="listitem">
+      <figcaption>
+        <strong>Library</strong>
+        <span>Browse folders and playlists.</span>
+      </figcaption>
+      <div class="mobile-panel-crop mobile-panel-library">
+        <Image src={player} alt="" width={1120} format="png" loading="lazy" class="mobile-panel-image" />
+      </div>
+    </figure>
+
+    <figure class="mobile-panel" role="listitem">
+      <figcaption>
+        <strong>Player</strong>
+        <span>See playback, volume, and spectrum.</span>
+      </figcaption>
+      <div class="mobile-panel-crop mobile-panel-player">
+        <Image src={player} alt="" width={1120} format="png" loading="lazy" class="mobile-panel-image" />
+      </div>
+    </figure>
+
+    <figure class="mobile-panel" role="listitem">
+      <figcaption>
+        <strong>Queue</strong>
+        <span>Keep the next tracks in view.</span>
+      </figcaption>
+      <div class="mobile-panel-crop mobile-panel-queue">
+        <Image src={player} alt="" width={1120} format="png" loading="lazy" class="mobile-panel-image" />
+      </div>
+    </figure>
   </div>
 </figure>
 
@@ -41,7 +73,7 @@ import player from "../assets/player.png";
     border-bottom: 1px solid var(--line);
     padding: 0.7rem 0.9rem;
     color: var(--soft);
-    font: 400 0.62rem var(--font-mono);
+    font: 400 0.75rem var(--font-mono);
     letter-spacing: 0.08em;
   }
 
@@ -57,10 +89,76 @@ import player from "../assets/player.png";
     height: auto;
   }
 
+  .mobile-panels {
+    display: none;
+  }
+
   @media (max-width: 720px) {
-    .terminal-image {
-      width: 50rem;
+    .terminal-figure {
+      border: 0;
+      background: transparent;
+    }
+
+    .terminal-heading,
+    .desktop-player {
+      display: none;
+    }
+
+    .mobile-panels {
+      display: grid;
+      gap: 2.5rem;
+    }
+
+    .mobile-panel {
+      min-width: 0;
+    }
+
+    .mobile-panel figcaption {
+      display: grid;
+      gap: 0.3rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .mobile-panel figcaption strong {
+      color: var(--ink);
+      font: 500 1.25rem var(--font-display);
+    }
+
+    .mobile-panel figcaption span {
+      color: var(--muted);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .mobile-panel-crop {
+      position: relative;
+      height: 15rem;
+      overflow: hidden;
+      background: #0e1214;
+    }
+
+    .mobile-panel-image {
+      position: absolute;
+      top: -1.6rem;
+      width: 80rem;
       max-width: none;
+      height: auto;
+    }
+
+    .mobile-panel-library .mobile-panel-image {
+      top: 0;
+      left: -1.5rem;
+    }
+
+    .mobile-panel-player .mobile-panel-image {
+      top: -5.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .mobile-panel-queue .mobile-panel-image {
+      top: 0;
+      right: -0.75rem;
     }
   }
 </style>

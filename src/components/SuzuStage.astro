@@ -3,8 +3,8 @@ import { Image } from "astro:assets";
 import suzu from "../assets/suzu.png";
 ---
 
-<figure class="mx-auto w-full max-w-[30rem]">
-  <div class="aspect-[4/5] border-l border-line pl-5 sm:pl-8">
+<figure class="suzu-stage mx-auto w-full max-w-[30rem]">
+  <div class="aspect-[4/5]">
     <Image
       src={suzu}
       alt="Suzu, a bell cricket cut from charcoal and ivory Japanese paper, holding a small brass bell"
@@ -15,8 +15,17 @@ import suzu from "../assets/suzu.png";
       class="h-full w-full object-contain"
     />
   </div>
-  <figcaption class="mt-4 flex items-center justify-between gap-4 border-t border-line pt-3 font-mono text-[0.62rem] tracking-[0.12em] text-soft uppercase">
+  <figcaption class="mt-3 flex items-center justify-center gap-3 text-xs tracking-[0.08em] text-soft uppercase">
     <span>Suzu</span>
-    <span>bell cricket</span>
+    <span class="text-accent" aria-hidden="true">·</span>
+    <span>Bell cricket</span>
   </figcaption>
 </figure>
+
+<style>
+  @media (max-width: 720px) {
+    .suzu-stage {
+      max-width: 17rem;
+    }
+  }
+</style>

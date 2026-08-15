@@ -92,15 +92,15 @@ const releases = [
             <div class="sm:text-right">
               <div class:list={["absolute top-2 left-0 size-3 border-2 border-night sm:left-[8.1rem]", index === 0 ? "bg-accent" : "bg-soft"]}></div>
               <p class="font-mono text-xs text-ink">v{release.version}</p>
-              <p class="mt-1 font-mono text-[0.6rem] leading-relaxed text-soft">{release.date}</p>
+              <p class="mt-1 font-mono text-xs leading-relaxed text-soft">{release.date}</p>
             </div>
             <div class="panel p-6 sm:p-8">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="font-display text-3xl text-ink">{release.label}</h2>
-                {index === 0 && <span class="border border-line px-3 py-1 font-mono text-[0.6rem] text-muted">current</span>}
+                {index === 0 && <span class="border border-line px-3 py-1 text-xs font-medium text-muted">current</span>}
               </div>
               <p class="mt-3 text-muted">{release.summary}</p>
-              <ul class="mt-6 grid gap-3 text-sm leading-relaxed text-muted">
+              <ul class="mt-6 grid gap-3 leading-relaxed text-muted">
                 {release.changes.map((change) => <li class="flex gap-3"><span class="mt-[0.65rem] size-1 shrink-0 bg-accent"></span><span>{change}</span></li>)}
               </ul>
             </div>

@@ -27,20 +27,20 @@ sudo ln -s suzumushi /usr/local/bin/suzu`;
       <article class="panel p-6 sm:p-8">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="font-mono text-[0.66rem] tracking-[0.15em] text-accent uppercase">Arch Linux</p>
+            <p class="eyebrow">Arch Linux</p>
             <h2 class="mt-3 font-display text-3xl text-ink">Install from AUR</h2>
           </div>
-          <span class="border border-line px-3 py-1 font-mono text-[0.6rem] text-muted">recommended</span>
+          <span class="border border-line px-3 py-1 text-xs font-medium text-muted">recommended</span>
         </div>
-        <p class="mt-4 text-sm leading-relaxed text-muted">The package provides the canonical <code class="font-mono text-ink">suzumushi</code> command and the relative <code class="font-mono text-ink">suzu</code> symlink.</p>
+        <p class="mt-4 leading-relaxed text-muted">The package provides the canonical <code class="font-mono text-ink">suzumushi</code> command and the relative <code class="font-mono text-ink">suzu</code> symlink.</p>
         <div class="mt-6"><CommandBlock command="yay -S suzumushi-bin" /></div>
         <ButtonLink href={SITE.aur} variant="secondary" external class="mt-6">Open the AUR package ↗</ButtonLink>
       </article>
 
       <article class="panel p-6 sm:p-8">
-        <p class="font-mono text-[0.66rem] tracking-[0.15em] text-accent uppercase">GNU/Linux x86-64</p>
+        <p class="eyebrow">GNU/Linux x86-64</p>
         <h2 class="mt-3 font-display text-3xl text-ink">Install the archive</h2>
-        <p class="mt-4 text-sm leading-relaxed text-muted">Download the archive and checksum. Install only after verification reports <code class="font-mono text-ink">OK</code>.</p>
+        <p class="mt-4 leading-relaxed text-muted">Download the archive and checksum. Install only after verification reports <code class="font-mono text-ink">OK</code>.</p>
         <div class="mt-6"><CommandBlock command={curlCommand} label="Download" /></div>
       </article>
     </div>
@@ -48,10 +48,10 @@ sudo ln -s suzumushi /usr/local/bin/suzu`;
     <div class="mt-5 panel p-6 sm:p-8">
       <div class="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
         <div class="min-w-0">
-          <p class="font-mono text-[0.66rem] tracking-[0.15em] text-accent uppercase">Verify, then install</p>
+          <p class="eyebrow">Verify, then install</p>
           <h2 class="mt-3 font-display text-3xl text-ink">Check the archive before it enters the path.</h2>
           <p class="mt-4 text-sm leading-relaxed text-muted">The expected archive SHA-256 for v{SITE.version} is:</p>
-          <p class="mt-3 break-all font-mono text-[0.66rem] leading-relaxed text-ink">{RELEASE.checksum}</p>
+          <p class="mt-3 break-all font-mono text-xs leading-relaxed text-ink">{RELEASE.checksum}</p>
         </div>
         <div class="min-w-0"><CommandBlock command={installCommand} /></div>
       </div>

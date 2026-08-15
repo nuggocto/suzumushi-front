@@ -8,7 +8,7 @@
   --color-night: #0c0c0b;
   --color-ink: #e9e2d2;
   --color-muted: #a49e91;
-  --color-soft: #716d65;
+  --color-soft: #858077;
   --color-accent: #b59b61;
   --color-panel: #121210;
   --color-panel-high: #181713;
@@ -20,7 +20,7 @@
   --night: #0c0c0b;
   --ink: #e9e2d2;
   --muted: #a49e91;
-  --soft: #716d65;
+  --soft: #858077;
   --accent: #b59b61;
   --panel: #121210;
   --panel-high: #181713;
@@ -121,23 +121,13 @@
 .section-label,
 .eyebrow {
   color: var(--accent);
-  font: 500 0.68rem var(--font-mono);
-  letter-spacing: 0.15em;
+  font: 600 0.75rem var(--font-sans);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .section-label {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   margin-bottom: 2rem;
-}
-
-.section-label::after {
-  height: 1px;
-  flex: 1;
-  background: var(--line);
-  content: "";
 }
 
 .display-title {
@@ -190,14 +180,14 @@
   color: var(--ink);
 }
 
-.mono-link {
+.nav-link {
   color: var(--muted);
-  font: 500 0.72rem var(--font-mono);
+  font: 500 0.875rem/1.2 var(--font-sans);
   text-decoration: none;
   transition: color 150ms ease;
 }
 
-.mono-link:hover {
+.nav-link:hover {
   color: var(--ink);
 }
 
@@ -248,7 +238,7 @@
   text-underline-offset: 3px;
 }
 
-.prose code:not(pre code) {
+.prose code:not(.code-block code) {
   border: 1px solid var(--line);
   background: var(--panel);
   padding: 0.12rem 0.35rem;

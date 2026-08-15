@@ -28,33 +28,33 @@ const principles = [
 ---
 
 <Layout>
-  <section class="shell grid min-h-[calc(100svh-4.4rem)] items-center gap-12 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
+  <section class="shell grid items-center gap-10 py-12 sm:py-14 lg:min-h-[calc(100svh-4.4rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:py-20">
     <div class="text-center lg:text-left">
       <p class="eyebrow">A local player for Linux</p>
       <h1 class="display-title mt-6 text-[clamp(3.4rem,7vw,6.7rem)] leading-[0.92]">
-        Keep your<br />music close.
+        Keep your<br /><span class="whitespace-nowrap">music close.</span>
       </h1>
       <p class="mx-auto mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg lg:mx-0">
-        Suzumushi plays the files already on your machine. No account. No import. Open the terminal and listen.
+        Suzumushi plays the files already on your machine with no account or import required; open the terminal and listen.
       </p>
       <div class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
         <ButtonLink href="/install">Install Suzumushi</ButtonLink>
         <ButtonLink href={SITE.github} variant="secondary" external>View source ↗</ButtonLink>
       </div>
-      <p class="mt-7 font-mono text-[0.62rem] leading-relaxed tracking-[0.1em] text-soft uppercase">
+      <p class="mt-7 font-mono text-xs leading-relaxed tracking-[0.06em] text-soft uppercase">
         MP3 · FLAC · WAV/PCM · Ogg/Vorbis · Apache-2.0
       </p>
     </div>
     <SuzuStage />
   </section>
 
-  <section class="border-y border-line">
+  <section class="bg-panel/40">
     <div class="section shell">
       <div class="section-label">The player</div>
       <div class="mb-10 grid gap-5 lg:grid-cols-2 lg:items-end">
-        <h2 class="display-title text-4xl leading-tight sm:text-5xl">Three panels.<br />Nothing else.</h2>
+        <h2 class="display-title text-4xl leading-tight sm:text-5xl">Three panels.</h2>
         <p class="max-w-lg leading-relaxed text-muted lg:justify-self-end">
-          The library on the left. The song in the middle. The queue on the right. Every important key stays in view.
+          The library sits on the left, the current song in the middle, and the queue on the right, while every important key stays in view.
         </p>
       </div>
       <TerminalPlayer />
@@ -70,25 +70,25 @@ const principles = [
           Local playback, a clear queue, and a quiet way back to where you stopped.
         </p>
       </div>
-      <div class="border-t border-line">
+      <div class="grid gap-8">
         {principles.map((principle) => (
-          <article class="grid gap-3 border-b border-line py-6 sm:grid-cols-[3rem_0.72fr_1.28fr] sm:gap-5">
-            <span class="font-mono text-[0.65rem] text-accent">{principle.number}</span>
+          <article class="grid gap-3 sm:grid-cols-[3rem_0.72fr_1.28fr] sm:gap-5">
+            <span class="font-mono text-xs text-accent">{principle.number}</span>
             <h3 class="font-display text-xl text-ink">{principle.title}</h3>
-            <p class="text-sm leading-relaxed text-muted">{principle.description}</p>
+            <p class="leading-relaxed text-muted">{principle.description}</p>
           </article>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="shell pb-20 sm:pb-28">
-    <div class="border-t border-line pt-10 sm:flex sm:items-end sm:justify-between sm:gap-10">
+  <section class="bg-panel">
+    <div class="shell py-14 sm:flex sm:items-end sm:justify-between sm:gap-10 sm:py-16">
       <div>
-        <p class="eyebrow">Install</p>
-        <h2 class="display-title mt-4 text-4xl sm:text-5xl">Bring one folder. Press play.</h2>
+        <p class="eyebrow">Linux release · v{SITE.version}</p>
+        <h2 class="display-title mt-4 text-4xl sm:text-5xl">Bring one folder and press play.</h2>
         <p class="mt-4 max-w-xl leading-relaxed text-muted">
-          Install the verified Linux release, choose a root, and leave the rest untouched.
+          Download the 64-bit GNU/Linux release, verify its SHA-256 checksum, then choose your music root.
         </p>
       </div>
       <div class="mt-7 flex shrink-0 flex-wrap gap-3 sm:mt-0">
