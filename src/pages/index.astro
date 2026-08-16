@@ -7,19 +7,16 @@ import { SITE } from "../data/site";
 
 const principles = [
   {
-    number: "01",
     title: "Files, not a catalog.",
     description:
       "Your folders are the library. Music, long listens, D&D sessions, and playlists remain ordinary files on disk.",
   },
   {
-    number: "02",
     title: "A queue that waits.",
     description:
       "Add a track or a whole playlist. Suzumushi remembers the queue and your place, then returns paused.",
   },
   {
-    number: "03",
     title: "At home on Linux.",
     description:
       "MPRIS and media keys control the same player. Nothing is copied to an account, service, or cloud.",
@@ -72,9 +69,11 @@ const principles = [
       </div>
       <div class="grid gap-8">
         {principles.map((principle) => (
-          <article class="grid gap-3 sm:grid-cols-[3rem_0.72fr_1.28fr] sm:gap-5">
-            <span class="font-mono text-xs text-accent">{principle.number}</span>
-            <h3 class="font-display text-xl text-ink">{principle.title}</h3>
+          <article class="grid items-start gap-3 sm:grid-cols-[0.72fr_1.28fr] sm:gap-8">
+            <div class="flex items-center gap-3 sm:pr-2">
+              <h3 class="font-display text-xl leading-snug text-ink">{principle.title}</h3>
+              <span class="shrink-0 font-mono text-sm text-accent sm:ml-auto" aria-hidden="true">→</span>
+            </div>
             <p class="leading-relaxed text-muted">{principle.description}</p>
           </article>
         ))}
