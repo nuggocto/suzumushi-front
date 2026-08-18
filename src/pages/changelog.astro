@@ -5,6 +5,28 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.1.1",
+    date: "18 August 2026",
+    label: "Reliability",
+    summary: "The release pipeline learned to guard against its own failures.",
+    changes: [
+      "Materialises the pinned Rust toolchain before the release workflow's parallel cargo installs, eliminating the rustup download race that failed the 1.1.0 run.",
+    ],
+  },
+  {
+    version: "1.1.0",
+    date: "18 August 2026",
+    label: "Hardening",
+    summary: "The player became more resilient against malformed audio and unruly devices.",
+    changes: [
+      "Updated Symphonia to 0.6.1 for its malformed-input hardening and decoder fixes.",
+      "Limited cumulative metadata-helper work to one minute per scan, then continued discovery with filename-only entries and one visible warning.",
+      "Prefers the native PipeWire backend with RTKit scheduling when available, keeping ALSA as the fallback.",
+      "Plays 44.1 kHz tracks on a 48 kHz PipeWire graph by opening the output stream at the track's own rate.",
+      "Turns recoverable device errors into counted, logged reports instead of ending playback, and stops counting expected end-of-track padding as a dropout.",
+    ],
+  },
+  {
     version: "1.0.2",
     date: "13 August 2026",
     label: "Polish",
@@ -76,7 +98,7 @@ const releases = [
 ] as const;
 ---
 
-<Layout title="Changelog" description="The Suzumushi release history, from its safe foundation to version 1.0.2.">
+<Layout title="Changelog" description="The Suzumushi release history, from its safe foundation to version 1.1.1.">
   <section class="shell pt-20 pb-10 sm:pt-28">
     <p class="eyebrow">Release notes</p>
     <h1 class="display-title mt-6 text-5xl leading-[0.98] sm:text-7xl">Small steps.<br />Quietly shipped.</h1>
