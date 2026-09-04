@@ -5,6 +5,22 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.1.2",
+    date: "5 September 2026",
+    label: "Playback fixes",
+    summary: "More reliable playback, seeking, and startup.",
+    changes: [
+      "Stops previous playback before reporting a failed track change, so a missing next file cannot leave audio playing behind an error message.",
+      "Keeps playback progress and saved positions updating after successful seeks.",
+      "Renders valid tracks shorter than one millisecond without crashing.",
+      "Restarts completed tracks from the beginning when Play is pressed, including tracks with an unknown duration.",
+      "Preserves the next queue item when the playing item and earlier entries are removed.",
+      "Retains admitted tracks when library scanning reaches its entry or path limit, while enforcing the remaining resource limits.",
+      "Continues terminal startup after two seconds if the desktop session bus is unresponsive.",
+      "Updates rtrb to 0.3.5 for RUSTSEC-2026-0274.",
+    ],
+  },
+  {
     version: "1.1.1",
     date: "18 August 2026",
     label: "Reliability",
@@ -98,7 +114,7 @@ const releases = [
 ] as const;
 ---
 
-<Layout title="Changelog" description="The Suzumushi release history, from its safe foundation to version 1.1.1.">
+<Layout title="Changelog" description={`The Suzumushi release history, through version ${SITE.version}.`}>
   <section class="shell pt-20 pb-10 sm:pt-28">
     <p class="eyebrow">Release notes</p>
     <h1 class="display-title mt-6 text-5xl leading-[0.98] sm:text-7xl">Small steps.<br />Quietly shipped.</h1>
