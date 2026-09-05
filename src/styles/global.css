@@ -2,7 +2,6 @@
 
 @theme {
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   --color-night: #0c0c0b;
@@ -115,29 +114,85 @@
 }
 
 .section {
-  padding-block: clamp(4.5rem, 9vw, 7.5rem);
+  padding-block: 3.5rem;
 }
 
 .section-label,
 .eyebrow {
   color: var(--accent);
-  font: 600 0.75rem var(--font-sans);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font: 500 0.875rem/1.5 var(--font-sans);
 }
 
 .section-label {
   margin-bottom: 2rem;
 }
 
-.display-title {
-  font-family: var(--font-display);
-  font-weight: 500;
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1.1;
   letter-spacing: -0.04em;
 }
 
-.font-display {
-  font-weight: 500;
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+
+.text-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 4px;
+}
+
+kbd {
+  display: inline-block;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 0.05rem 0.35rem;
+  color: var(--ink);
+  font: 400 0.875rem/1.5 var(--font-mono);
+}
+
+.setup-steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 1.5rem;
+  padding-left: 1.5rem;
+  list-style: decimal;
+}
+
+.setup-steps li {
+  padding-left: 0.5rem;
+}
+
+.setup-steps li::marker {
+  color: var(--accent);
+}
+
+.setup-steps code {
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font: 400 0.875rem/1.6 var(--font-mono);
+}
+
+.setup-steps li > code {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .section {
+    padding-block: 4rem;
+  }
+
+  .page-title {
+    font-size: 3rem;
+  }
 }
 
 .panel {
@@ -199,7 +254,7 @@
   background: #080807;
   padding: 1.1rem;
   color: #d5cdbd;
-  font: 400 0.8rem/1.7 var(--font-mono);
+  font: 400 0.875rem/1.7 var(--font-mono);
   scrollbar-color: var(--line) transparent;
 }
 
@@ -220,7 +275,7 @@
 .prose h2 {
   margin-top: 3.2rem;
   color: var(--ink);
-  font: 500 clamp(1.8rem, 4vw, 2.5rem) var(--font-display);
+  font: 600 1.5rem/1.3 var(--font-sans);
   letter-spacing: -0.03em;
   scroll-margin-top: 7rem;
 }
@@ -228,7 +283,7 @@
 .prose h3 {
   margin-top: 2rem;
   color: var(--ink);
-  font-size: 1.08rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -239,6 +294,7 @@
 }
 
 .prose code:not(.code-block code) {
+  overflow-wrap: anywhere;
   border: 1px solid var(--line);
   background: var(--panel);
   padding: 0.12rem 0.35rem;

@@ -9,9 +9,9 @@ interface Props {
 const { command, label } = Astro.props;
 ---
 
-<div data-command>
+<div class="min-w-0" data-command>
   <div class="mb-2 flex min-h-7 items-center justify-between gap-4">
-    <p class="font-mono text-xs tracking-[0.1em] text-accent uppercase">{label ?? "Command"}</p>
+    <p class="text-sm font-medium text-accent">{label ?? "Command"}</p>
     <CopyButton />
   </div>
   <div class="code-block">

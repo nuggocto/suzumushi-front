@@ -5,95 +5,131 @@ import SuzuStage from "../components/SuzuStage.astro";
 import TerminalPlayer from "../components/TerminalPlayer.astro";
 import { SITE } from "../data/site";
 
-const principles = [
+const features = [
   {
-    title: "Files, not a catalog.",
-    description:
-      "Your folders are the library. Music, long listens, D&D sessions, and playlists remain ordinary files on disk.",
+    title: "Find a track, build a queue",
+    description: "Search by artist, title, or filename. Add a track or a whole playlist, then reorder the queue from your keyboard.",
   },
   {
-    title: "A queue that waits.",
-    description:
-      "Add a track or a whole playlist. Suzumushi remembers the queue and your place, then returns paused.",
+    title: "Pick up where you stopped",
+    description: "Your queue, current track, and playback position are saved. Reopen the player and press play when you're ready.",
   },
   {
-    title: "At home on Linux.",
-    description:
-      "MPRIS and media keys control the same player. Nothing is copied to an account, service, or cloud.",
+    title: "Use your media keys",
+    description: "Play, pause, and skip from the terminal or your desktop's media controls. Both control the same player.",
+  },
+  {
+    title: "Keep your library local",
+    description: "Audio and playlists live in your Suzumushi folders. No account, streaming service, or cloud library required.",
   },
 ] as const;
 ---
 
 <Layout>
-  <section class="shell grid items-center gap-10 py-12 sm:py-14 lg:min-h-[calc(100svh-4.4rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:py-20">
-    <div class="text-center lg:text-left">
-      <p class="eyebrow">A local player for Linux</p>
-      <h1 class="display-title mt-6 text-[clamp(3.4rem,7vw,6.7rem)] leading-[0.92]">
-        Keep your<br /><span class="whitespace-nowrap">music close.</span>
-      </h1>
-      <p class="mx-auto mt-7 max-w-xl text-base leading-relaxed text-muted sm:text-lg lg:mx-0">
-        Suzumushi plays the files already on your machine with no account or import required; open the terminal and listen.
+  <section class="hero shell" aria-labelledby="hero-title">
+    <div>
+      <p class="eyebrow">A terminal music player for Linux</p>
+      <h1 id="hero-title" class="page-title mt-4">Keep your music close.</h1>
+      <p class="mt-5 max-w-2xl leading-relaxed text-muted">
+        Browse your local library, build a queue, and return to your saved playback position. No account required.
       </p>
-      <div class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
-        <ButtonLink href="/install">Install Suzumushi</ButtonLink>
-        <ButtonLink href={SITE.github} variant="secondary" external>View source ↗</ButtonLink>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <ButtonLink href="/install">Install for Linux</ButtonLink>
+        <ButtonLink href="#player" variant="secondary">See the player</ButtonLink>
       </div>
-      <p class="mt-7 font-mono text-xs leading-relaxed tracking-[0.06em] text-soft uppercase">
-        MP3 · FLAC · WAV/PCM · Ogg/Vorbis · Apache-2.0
-      </p>
+      <p class="mt-5 text-sm text-muted">Free and open source · v{SITE.version} · GNU/Linux x86-64</p>
     </div>
     <SuzuStage />
   </section>
 
-  <section class="bg-panel/40">
-    <div class="section shell">
-      <div class="section-label">The player</div>
-      <div class="mb-10 grid gap-5 lg:grid-cols-2 lg:items-end">
-        <h2 class="display-title text-4xl leading-tight sm:text-5xl">Three panels.</h2>
-        <p class="max-w-lg leading-relaxed text-muted lg:justify-self-end">
-          The library sits on the left, the current song in the middle, and the queue on the right, while every important key stays in view.
-        </p>
-      </div>
-      <TerminalPlayer />
+  <section id="player" class="shell pb-14 sm:pb-16" aria-labelledby="player-title">
+    <div class="mb-6">
+      <h2 id="player-title" class="section-title">Browse, queue, and play from your keyboard.</h2>
+      <p class="mt-3 max-w-2xl leading-relaxed text-muted">Your library on the left, playback in the middle, and the queue on the right. Suzu follows the music.</p>
     </div>
+    <TerminalPlayer />
+    <ul class="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted" aria-label="Player keyboard shortcuts">
+      <li><kbd>/</kbd> Search your library</li>
+      <li><kbd>Tab</kbd> Switch panels</li>
+      <li><kbd>Space</kbd> Play or pause</li>
+      <li><kbd>?</kbd> Show all keys</li>
+    </ul>
   </section>
 
-  <section class="section shell" aria-labelledby="principles-title">
-    <div class="section-label">Built to stay small</div>
-    <div class="grid gap-10 lg:grid-cols-[0.72fr_1.28fr]">
-      <div>
-        <h2 id="principles-title" class="display-title text-4xl leading-tight sm:text-5xl">Only what the music needs.</h2>
-        <p class="mt-5 max-w-sm leading-relaxed text-muted">
-          Local playback, a clear queue, and a quiet way back to where you stopped.
-        </p>
-      </div>
-      <div class="grid gap-8">
-        {principles.map((principle) => (
-          <article class="grid items-start gap-3 sm:grid-cols-[0.72fr_1.28fr] sm:gap-8">
-            <div class="flex items-center gap-3 sm:pr-2">
-              <h3 class="font-display text-xl leading-snug text-ink">{principle.title}</h3>
-              <span class="shrink-0 font-mono text-sm text-accent sm:ml-auto" aria-hidden="true">→</span>
-            </div>
-            <p class="leading-relaxed text-muted">{principle.description}</p>
+  <section class="border-y border-line bg-panel/40" aria-labelledby="features-title">
+    <div class="section shell">
+      <h2 id="features-title" class="section-title">The essentials for everyday listening.</h2>
+      <div class="mt-8 grid gap-8 sm:grid-cols-2 sm:gap-x-12">
+        {features.map((feature) => (
+          <article>
+            <h3 class="font-semibold text-ink">{feature.title}</h3>
+            <p class="mt-3 max-w-lg leading-relaxed text-muted">{feature.description}</p>
           </article>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="bg-panel">
-    <div class="shell py-14 sm:flex sm:items-end sm:justify-between sm:gap-10 sm:py-16">
+  <section class="section shell" aria-labelledby="first-listen-title">
+    <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
       <div>
-        <p class="eyebrow">Linux release · v{SITE.version}</p>
-        <h2 class="display-title mt-4 text-4xl sm:text-5xl">Bring one folder and press play.</h2>
-        <p class="mt-4 max-w-xl leading-relaxed text-muted">
-          Download the 64-bit GNU/Linux release, verify its SHA-256 checksum, then choose your music root.
+        <h2 id="first-listen-title" class="section-title">Your first listen.</h2>
+        <p class="mt-4 max-w-lg leading-relaxed text-muted">
+          After installation, create a Suzumushi folder and add your audio to its library. Suzumushi reads that library; it doesn't automatically scan your Music folder.
         </p>
+        <a class="text-link mt-5 inline-block" href="/install#first-library">Read the setup instructions →</a>
       </div>
-      <div class="mt-7 flex shrink-0 flex-wrap gap-3 sm:mt-0">
+      <ol class="setup-steps">
+        <li>
+          <h3 class="font-semibold">Create your library</h3>
+          <code>suzumushi init ./suzumushi</code>
+        </li>
+        <li>
+          <h3 class="font-semibold">Add your audio</h3>
+          <p class="mt-2 leading-relaxed text-muted">Copy audio files or folders into <code>./suzumushi/audio/library/</code>.</p>
+        </li>
+        <li>
+          <h3 class="font-semibold">Open the player</h3>
+          <code>suzumushi --root ./suzumushi</code>
+          <p class="mt-2 leading-relaxed text-muted">Select a track in Library and press <kbd>Enter</kbd> to add it and start listening.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="border-y border-line bg-panel" aria-labelledby="install-title">
+    <div class="section shell flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
+      <div>
+        <h2 id="install-title" class="section-title">Ready to listen?</h2>
+        <p class="mt-3 max-w-xl leading-relaxed text-muted">Install from the AUR on Arch Linux, or use the x86-64 GNU/Linux archive.</p>
+        <p class="mt-4 text-sm text-muted">MP3 · FLAC · 16-bit PCM WAV · Ogg Vorbis</p>
+      </div>
+      <div class="flex shrink-0 flex-wrap gap-3">
         <ButtonLink href="/install">Install for Linux</ButtonLink>
-        <ButtonLink href={SITE.aur} variant="secondary" external>AUR ↗</ButtonLink>
+        <ButtonLink href={SITE.github} variant="secondary" external>View source ↗</ButtonLink>
       </div>
     </div>
   </section>
 </Layout>
+
+<style>
+  .hero {
+    display: grid;
+    align-items: center;
+    gap: 2rem;
+    padding-block: 3rem;
+  }
+
+  @media (min-width: 640px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) 10rem;
+      padding-block: 4rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) 14rem;
+    }
+  }
+</style>
