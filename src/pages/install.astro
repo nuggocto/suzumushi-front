@@ -10,17 +10,19 @@ const installCommand = `tar -xf ${RELEASE.archive} &&
 cd ${RELEASE.archive.replace(".tar.xz", "")} &&
 sudo install -Dm755 suzumushi /usr/local/bin/suzumushi &&
 sudo ln -s suzumushi /usr/local/bin/suzu`;
+const nixCommand = `nix --extra-experimental-features 'nix-command flakes' \\
+  profile add ${SITE.nixFlake}`;
 ---
 
 <Layout title="Install" description="Install Suzumushi on Linux and set up your first local audio library.">
   <section class="section shell pb-8">
     <p class="eyebrow">Linux release · v{SITE.version}</p>
     <h1 class="page-title mt-4">Install Suzumushi.</h1>
-    <p class="mt-5 max-w-2xl leading-relaxed text-muted">Choose the AUR package for Arch Linux or the archive for x86-64 GNU/Linux. Then create your library below.</p>
+    <p class="mt-5 max-w-2xl leading-relaxed text-muted">Choose the AUR package for Arch Linux, the flake for NixOS, or the archive for x86-64 GNU/Linux. Then create your library below.</p>
   </section>
 
   <section class="shell pb-14 sm:pb-16" aria-label="Installation options">
-    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 xl:grid-cols-3">
       <article class="panel p-6 sm:p-8">
         <h2 class="section-title">Arch Linux</h2>
         <p class="mt-4 leading-relaxed text-muted">Install the AUR package with yay. Both <code class="font-mono text-sm text-ink">suzumushi</code> and <code class="font-mono text-sm text-ink">suzu</code> launch the player.</p>
@@ -31,7 +33,18 @@ sudo ln -s suzumushi /usr/local/bin/suzu`;
         </div>
       </article>
 
-      <article class="panel p-6 sm:p-8">
+      <article id="nixos" class="panel min-w-0 p-6 sm:p-8">
+        <h2 class="section-title">NixOS x86-64</h2>
+        <p class="mt-4 leading-relaxed text-muted">With Nix installed, add the flake to your user profile. Both <code class="font-mono text-sm text-ink">suzumushi</code> and <code class="font-mono text-sm text-ink">suzu</code> launch the player.</p>
+        <div class="mt-6"><CommandBlock command={nixCommand} label="Install with Nix" /></div>
+        <p class="mt-4 text-sm leading-relaxed text-muted">Nix builds the current shrek branch with pinned dependencies. The first installation may take a few minutes.</p>
+        <div class="mt-6 flex flex-wrap items-center gap-5">
+          <a class="text-link" href="#first-library">Next: set up your library →</a>
+          <a class="text-link text-sm" href={SITE.nixDocs} target="_blank" rel="noreferrer">NixOS and Home Manager configuration ↗</a>
+        </div>
+      </article>
+
+      <article class="panel min-w-0 p-6 sm:p-8">
         <h2 class="section-title">GNU/Linux x86-64</h2>
         <p class="mt-4 leading-relaxed text-muted">Download the release archive, verify its checksum, and install the player.</p>
         <details class="mt-6">

@@ -6,6 +6,8 @@ export const SITE = {
   github: "https://github.com/nuggocto/suzumushi",
   release: "https://github.com/nuggocto/suzumushi/releases/tag/v1.1.3",
   aur: "https://aur.archlinux.org/packages/suzumushi-bin",
+  nixFlake: "github:nuggocto/suzumushi/shrek",
+  nixDocs: "https://github.com/nuggocto/suzumushi/blob/shrek/docs/nix.md",
   license: "https://github.com/nuggocto/suzumushi/blob/shrek/LICENSE",
 } as const;
 
