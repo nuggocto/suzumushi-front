@@ -5,6 +5,20 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.1.4",
+    date: "12 September 2026",
+    label: "Playback reliability",
+    summary: "Preserves track endings, fixes paused playback and desktop controls, and adds stable Nix installation.",
+    changes: [
+      "Preserves the end of tracks by waiting for buffered audio before closing playback.",
+      "Keeps next, previous, and seeking silent while playback is paused, including on native PipeWire.",
+      "Keeps desktop PlayPause and Play working after clearing the queue while a track remains active.",
+      "Applies the scan entry limit to rejected filenames as well as accepted paths.",
+      "Rejects malformed WAV channel counts and limits header inspection.",
+      "Adds stable Nix installation from the v1.1.4 tag, with package build and installation checks in CI.",
+    ],
+  },
+  {
     version: "1.1.3",
     date: "5 September 2026",
     label: "Faster repeat startup",

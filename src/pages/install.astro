@@ -37,7 +37,7 @@ const nixCommand = `nix --extra-experimental-features 'nix-command flakes' \\
         <h2 class="section-title">NixOS x86-64</h2>
         <p class="mt-4 leading-relaxed text-muted">With Nix installed, add the flake to your user profile. Both <code class="font-mono text-sm text-ink">suzumushi</code> and <code class="font-mono text-sm text-ink">suzu</code> launch the player.</p>
         <div class="mt-6"><CommandBlock command={nixCommand} label="Install with Nix" /></div>
-        <p class="mt-4 text-sm leading-relaxed text-muted">Nix builds the current shrek branch with pinned dependencies. The first installation may take a few minutes.</p>
+        <p class="mt-4 text-sm leading-relaxed text-muted">Nix builds the stable v{SITE.version} release with pinned dependencies. The first installation may take a few minutes.</p>
         <div class="mt-6 flex flex-wrap items-center gap-5">
           <a class="text-link" href="#first-library">Next: set up your library →</a>
           <a class="text-link text-sm" href={SITE.nixDocs} target="_blank" rel="noreferrer">NixOS and Home Manager configuration ↗</a>
