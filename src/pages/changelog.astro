@@ -5,6 +5,20 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.1.5",
+    date: "15 September 2026",
+    label: "Playback fixes and code cleanup",
+    summary: "Keeps audio channels aligned during underruns and preserves pause when seeking to a track's end.",
+    changes: [
+      "Keeps stereo and multichannel output aligned when the decoder falls behind, by publishing and consuming complete audio frames.",
+      "Keeps playback paused when seeking exactly to the end of a track, including when advancing to the next track or repeating.",
+      "Separates browser/search, queue operations, and playback transitions into focused modules with clearer state ownership.",
+      "Simplifies audio worker steps, decoder header writes, and desktop volume rounding.",
+      "Strengthens logging shutdown, queue-drop, channel alignment, and decoded seek tests, and removes misleading assertions.",
+      "Updates stable Nix installation to v1.1.5 and adds a code map for contributors. Existing commands, configuration files, and saved sessions remain compatible.",
+    ],
+  },
+  {
     version: "1.1.4",
     date: "12 September 2026",
     label: "Playback reliability",
