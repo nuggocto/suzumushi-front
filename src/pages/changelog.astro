@@ -5,6 +5,20 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.1.6",
+    date: "23 September 2026",
+    label: "Keep playing through upgrades",
+    summary: "Keeps playback, seeking, and metadata reads working when a package upgrade replaces the running executable.",
+    changes: [
+      "Starts audio and metadata helpers from the running executable image, so an open session keeps working after an upgrade and helpers match the parent's protocol version.",
+      "Reports misused init arguments as argument errors and unsafe log storage as a root problem.",
+      "Checks queue item byte accounting at compile time and reuses shared bounded-text helpers.",
+      "Removes unused path-based scan entry points and stops counting file symlinks as mount decisions.",
+      "Consolidates overlapping tests and adds an upgrade regression that also runs in the Nix sandbox.",
+      "Updates the Linux archive, AUR package, and stable Nix installation to 1.1.6.",
+    ],
+  },
+  {
     version: "1.1.5",
     date: "15 September 2026",
     label: "Playback fixes and code cleanup",
