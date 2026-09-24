@@ -1,113 +1,163 @@
 ---
+import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
 import ButtonLink from "../components/ButtonLink.astro";
-import SuzuStage from "../components/SuzuStage.astro";
-import TerminalPlayer from "../components/TerminalPlayer.astro";
+import CopyButton from "../components/CopyButton.astro";
+import LivePlayer from "../components/LivePlayer.astro";
+import suzu from "../assets/suzu.png";
 import { SITE } from "../data/site";
 
 const features = [
   {
     title: "Find a track, build a queue",
     description: "Search by artist, title, or filename. Add a track or a whole playlist, then reorder the queue from your keyboard.",
+    sample: [
+      ["/", "search artist, title, filename, and path"],
+      ["Enter", "add a track or a whole playlist"],
+      ["J or K", "move the selected item down or up"],
+    ],
   },
   {
     title: "Pick up where you stopped",
     description: "Your queue, current track, and playback position are saved. Reopen the player and press play when you're ready.",
+    sample: [["State: Paused"], ["[==========------------------]  1:26 / 3:40"], ["Session restored; Space resumes"]],
   },
   {
     title: "Use your media keys",
     description: "Play, pause, and skip from the terminal or your desktop's media controls. Both control the same player.",
+    sample: [["playerctl --player=suzumushi play-pause"], ["playerctl --player=suzumushi next"], ["playerctl --player=suzumushi metadata"]],
   },
   {
     title: "Keep your library local",
     description: "Audio and playlists live in your Suzumushi folders. No account, streaming service, or cloud library required.",
+    sample: [
+      ["suzumushi/audio/"],
+      ["├── library/"],
+      ["│   ├── Music/"],
+      ["│   └── Audiobooks/"],
+      ["└── playlists/"],
+      ["    └── Evening/"],
+    ],
   },
+] as const;
+
+const steps = [
+  { title: "Create your library", command: "suzumushi init ./suzumushi" },
+  { title: "Add your audio", path: "./suzumushi/audio/library/" },
+  { title: "Open the player", command: "suzumushi --root ./suzumushi" },
 ] as const;
 ---
 
 <Layout>
   <section class="hero shell" aria-labelledby="hero-title">
-    <div>
-      <p class="eyebrow">A terminal music player for Linux</p>
-      <h1 id="hero-title" class="page-title mt-4">Keep your music close.</h1>
-      <p class="mt-5 max-w-2xl leading-relaxed text-muted">
-        Browse your local library, build a queue, and return to your saved playback position. No account required.
+    <h1 id="hero-title" class="display hero-title">Keep your music close.</h1>
+    <div class="hero-copy">
+      <p class="hero-lede">
+        Suzumushi is a terminal music player for Linux. Browse your local library, build a queue, and return to your saved playback position. No account required.
       </p>
-      <div class="mt-6 flex flex-wrap gap-3">
-        <ButtonLink href="/install">Install for Linux</ButtonLink>
-        <ButtonLink href="#player" variant="secondary">See the player</ButtonLink>
-      </div>
-      <p class="mt-5 text-sm text-muted">Free and open source · v{SITE.version} · GNU/Linux x86-64</p>
-    </div>
-    <SuzuStage />
-  </section>
-
-  <section id="player" class="shell pb-14 sm:pb-16" aria-labelledby="player-title">
-    <div class="mb-6">
-      <h2 id="player-title" class="section-title">Browse, queue, and play from your keyboard.</h2>
-      <p class="mt-3 max-w-2xl leading-relaxed text-muted">Your library on the left, playback in the middle, and the queue on the right. Suzu follows the music.</p>
-    </div>
-    <TerminalPlayer />
-    <ul class="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted" aria-label="Player keyboard shortcuts">
-      <li><kbd>/</kbd> Search your library</li>
-      <li><kbd>Tab</kbd> Switch panels</li>
-      <li><kbd>Space</kbd> Play or pause</li>
-      <li><kbd>?</kbd> Show all keys</li>
-    </ul>
-  </section>
-
-  <section class="border-y border-line bg-panel/40" aria-labelledby="features-title">
-    <div class="section shell">
-      <h2 id="features-title" class="section-title">The essentials for everyday listening.</h2>
-      <div class="mt-8 grid gap-8 sm:grid-cols-2 sm:gap-x-12">
-        {features.map((feature) => (
-          <article>
-            <h3 class="font-semibold text-ink">{feature.title}</h3>
-            <p class="mt-3 max-w-lg leading-relaxed text-muted">{feature.description}</p>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="section shell" aria-labelledby="first-listen-title">
-    <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
-      <div>
-        <h2 id="first-listen-title" class="section-title">Your first listen.</h2>
-        <p class="mt-4 max-w-lg leading-relaxed text-muted">
-          After installation, create a Suzumushi folder and add your audio to its library. Suzumushi reads that library; it doesn't automatically scan your Music folder.
-        </p>
-        <a class="text-link mt-5 inline-block" href="/install#first-library">Read the setup instructions →</a>
-      </div>
-      <ol class="setup-steps">
-        <li>
-          <h3 class="font-semibold">Create your library</h3>
-          <code>suzumushi init ./suzumushi</code>
-        </li>
-        <li>
-          <h3 class="font-semibold">Add your audio</h3>
-          <p class="mt-2 leading-relaxed text-muted">Copy audio files or folders into <code>./suzumushi/audio/library/</code>.</p>
-        </li>
-        <li>
-          <h3 class="font-semibold">Open the player</h3>
-          <code>suzumushi --root ./suzumushi</code>
-          <p class="mt-2 leading-relaxed text-muted">Select a track in Library and press <kbd>Enter</kbd> to add it and start listening.</p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <section class="border-y border-line bg-panel" aria-labelledby="install-title">
-    <div class="section shell flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
-      <div>
-        <h2 id="install-title" class="section-title">Ready to listen?</h2>
-        <p class="mt-3 max-w-xl leading-relaxed text-muted">Install from the AUR on Arch Linux, use the flake on NixOS, or download the x86-64 GNU/Linux archive.</p>
-        <p class="mt-4 text-sm text-muted">MP3 · FLAC · 16-bit PCM WAV · Ogg Vorbis</p>
-      </div>
-      <div class="flex shrink-0 flex-wrap gap-3">
+      <div class="hero-actions">
         <ButtonLink href="/install">Install for Linux</ButtonLink>
         <ButtonLink href={SITE.github} variant="secondary" external>View source ↗</ButtonLink>
       </div>
+      <p class="meta">Free and open source. Version {SITE.version} for <span class="nowrap">x86-64 GNU/Linux.</span></p>
+    </div>
+  </section>
+
+  <section id="player" class="shell player-section" aria-label="Try the player">
+    <LivePlayer />
+  </section>
+
+  <section class="section shell" aria-labelledby="features-title">
+    <h2 id="features-title" class="display section-heading">The essentials for everyday listening.</h2>
+    <p class="section-lede">
+      Your library on the left, playback in the middle, and the queue on the right. Suzu follows the music.
+    </p>
+    <div class="features">
+      {
+        features.map((feature) => (
+          <article class="feature">
+            <div>
+              <h3 class="feature-title">{feature.title}</h3>
+              <p class="feature-text">{feature.description}</p>
+            </div>
+            <div class="sample">
+              {feature.sample.map((line) =>
+                line.length === 2 ? (
+                  <span class="sample-line">
+                    <span class="sample-key">{line[0]}</span>
+                    {line[1]}
+                  </span>
+                ) : (
+                  <span class="sample-line">{line[0]}</span>
+                ),
+              )}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section shell first-listen" aria-labelledby="first-listen-title">
+    <div>
+      <h2 id="first-listen-title" class="display section-heading">Your first listen.</h2>
+      <p class="section-lede">
+        After installation, create a Suzumushi folder and add your audio to its library. Suzumushi reads that library; it doesn't automatically scan your Music folder.
+      </p>
+      <a class="text-link" href="/install#first-library">Read the setup instructions</a>
+    </div>
+    <ol class="steps">
+      {
+        steps.map((step, index) => (
+          <li class="step">
+            <span class="step-number" aria-hidden="true">{index + 1}</span>
+            <div class="min-w-0">
+              <h3 class="step-title">{step.title}</h3>
+              {"command" in step ? (
+                <div class="step-command" data-command>
+                  <code>{step.command}</code>
+                  <CopyButton />
+                </div>
+              ) : (
+                <p class="step-text">
+                  Copy audio files or folders into <code>{step.path}</code>
+                </p>
+              )}
+              {index === 2 && (
+                <p class="step-text">
+                  Select a track in Library and press <kbd>Enter</kbd> to add it and start listening.
+                </p>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="paper" aria-labelledby="install-title">
+    <div class="shell paper-inner">
+      <div class="paper-copy">
+        <h2 id="install-title" class="display">Ready to listen?</h2>
+        <p class="paper-text">
+          Install from the AUR on Arch Linux, use the flake on NixOS, or download the x86-64 GNU/Linux archive.
+        </p>
+        <div class="paper-actions">
+          <ButtonLink href="/install">Install for Linux</ButtonLink>
+          <ButtonLink href={SITE.github} variant="secondary" external>View source ↗</ButtonLink>
+        </div>
+        <p class="paper-meta">Plays MP3, FLAC, 16-bit PCM WAV, and Ogg Vorbis.</p>
+      </div>
+      <figure class="paper-figure">
+        <Image
+          src={suzu}
+          alt="Suzu, a bell cricket cut from charcoal and ivory Japanese paper, holding a small brass bell"
+          widths={[320, 480, 720, 960]}
+          sizes="(min-width: 1024px) 26rem, (min-width: 640px) 20rem, 70vw"
+          class="paper-suzu"
+        />
+        <figcaption>Suzu, the bell cricket</figcaption>
+      </figure>
     </div>
   </section>
 </Layout>
@@ -115,21 +165,280 @@ const features = [
 <style>
   .hero {
     display: grid;
-    align-items: center;
-    gap: 2rem;
-    padding-block: 3rem;
+    gap: 1.5rem;
+    padding-block: 3rem 2rem;
   }
 
-  @media (min-width: 640px) {
+  .hero-title {
+    max-width: 11ch;
+    margin: 0;
+  }
+
+  .hero-lede {
+    max-width: 34rem;
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .meta {
+    margin: 1rem 0 0;
+    color: var(--soft);
+    font-size: var(--size-sm);
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  @media (min-width: 900px) {
     .hero {
-      grid-template-columns: minmax(0, 1fr) 10rem;
-      padding-block: 4rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 4rem;
+      align-items: end;
+      padding-block: 4rem 2.5rem;
     }
   }
 
-  @media (min-width: 1024px) {
-    .hero {
-      grid-template-columns: minmax(0, 1fr) 14rem;
+  .player-section {
+    padding-bottom: 2rem;
+  }
+
+  .section-heading {
+    max-width: 16ch;
+  }
+
+  .section-lede {
+    max-width: 36rem;
+    margin: 1.25rem 0 1.5rem;
+    color: var(--muted);
+  }
+
+  .features {
+    margin-top: 3rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .feature {
+    display: grid;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--line);
+    padding-block: 2rem;
+  }
+
+  @media (min-width: 900px) {
+    .feature {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: 4rem;
+      align-items: center;
+    }
+  }
+
+  .feature-title {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .feature-text {
+    max-width: 30rem;
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+  }
+
+  .sample {
+    display: grid;
+    overflow-x: auto;
+    margin: 0;
+    border-left: 2px solid var(--sage);
+    padding: 0.25rem 0 0.25rem 1.25rem;
+    color: var(--ink);
+    font: 400 var(--size-sm) / 1.7 var(--font-mono);
+    scrollbar-color: var(--line) transparent;
+  }
+
+  .sample-line {
+    display: block;
+    white-space: pre;
+  }
+
+  .sample-key {
+    display: inline-block;
+    min-width: 8ch;
+    color: var(--sage);
+  }
+
+  .first-listen {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  @media (min-width: 900px) {
+    .first-listen {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: 4rem;
+    }
+  }
+
+  .steps {
+    display: grid;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 900px) {
+    .steps {
+      padding-top: 0.75rem;
+    }
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+  }
+
+  .step-number {
+    color: var(--brass);
+    font: 400 var(--size-sm) / 1.8 var(--font-mono);
+  }
+
+  .step-title {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .step-command {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.6rem;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    padding: 0.3rem 0.3rem 0.3rem 1rem;
+  }
+
+  .step-command code {
+    overflow-x: auto;
+    white-space: nowrap;
+    font: 400 var(--size-sm) / 1.6 var(--font-mono);
+  }
+
+  .step-text {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+  }
+
+  .step-text code {
+    overflow-wrap: anywhere;
+    color: var(--ink);
+    font: 400 var(--size-sm) var(--font-mono);
+  }
+
+  /* The closing band is the paper Suzu is cut from. */
+  .paper {
+    margin-top: 2rem;
+    background: var(--paper);
+    color: var(--charcoal);
+  }
+
+  .paper-inner {
+    display: grid;
+    gap: 1rem;
+    align-items: end;
+    padding-top: 4rem;
+  }
+
+  .paper-copy {
+    padding-bottom: 1rem;
+  }
+
+  .paper-text {
+    max-width: 30rem;
+    margin: 1.25rem 0 0;
+    color: #444b49;
+  }
+
+  .paper-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .paper-actions :global(.button) {
+    border-color: var(--charcoal);
+    background: var(--charcoal);
+    color: var(--paper);
+  }
+
+  .paper-actions :global(.button:hover) {
+    border-color: #3a403e;
+    background: #3a403e;
+    color: var(--paper);
+  }
+
+  .paper-actions :global(.button-secondary) {
+    background: transparent;
+    color: var(--charcoal);
+  }
+
+  .paper-actions :global(.button-secondary:hover) {
+    border-color: var(--charcoal);
+    background: #d8d1bf;
+    color: var(--charcoal);
+  }
+
+  .paper-actions :global(.button:focus-visible) {
+    outline-color: var(--charcoal);
+  }
+
+  .paper-meta {
+    margin: 1.25rem 0 0;
+    color: #555c5a;
+    font-size: var(--size-sm);
+  }
+
+  .paper-figure {
+    justify-self: center;
+    width: min(70vw, 20rem);
+    margin: 0;
+  }
+
+  .paper-suzu {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .paper-figure figcaption {
+    padding-block: 0.5rem 1.5rem;
+    color: #555c5a;
+    font-size: var(--size-sm);
+    text-align: center;
+  }
+
+  @media (min-width: 900px) {
+    .paper-inner {
+      grid-template-columns: minmax(0, 1fr) 26rem;
+      gap: 4rem;
+      padding-top: 5rem;
+    }
+
+    .paper-copy {
+      padding-bottom: 5rem;
+    }
+
+    .paper-figure {
+      width: 26rem;
+      margin-top: -8rem;
     }
   }
 </style>

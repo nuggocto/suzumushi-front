@@ -1,0 +1,1162 @@
+---
+import player from "../assets/player.png";
+
+const keys = [
+  { key: "Tab", label: "Tab", name: "Switch panel" },
+  { key: "ArrowUp", label: "↑", name: "Move up" },
+  { key: "ArrowDown", label: "↓", name: "Move down" },
+  { key: "Enter", label: "Enter", name: "Open or add" },
+  { key: " ", label: "Space", name: "Play or pause" },
+  { key: "n", label: "n", name: "Next track" },
+  { key: "x", label: "x", name: "Shuffle" },
+  { key: "?", label: "?", name: "Key guide" },
+] as const;
+---
+
+<figure class="live" data-live>
+  <div
+    class="term"
+    tabindex="0"
+    role="group"
+    aria-roledescription="interactive demo"
+    aria-label="Suzumushi player demo"
+    aria-describedby="live-hint"
+    data-term
+  >
+    <div class="screen" data-screen>
+      <section class="pane pane-library" data-pane="library" aria-label="Library">
+        <p class="pane-title" data-title></p>
+        <div class="rows" data-rows></div>
+      </section>
+      <section class="pane pane-player" data-pane="player" aria-label="Player">
+        <p class="pane-title" data-title></p>
+        <div class="player-body">
+          <p class="line" data-now></p>
+          <p class="line" aria-hidden="true"></p>
+          <svg class="suzu" data-suzu viewBox="0 0 192 135" role="img" aria-label="Suzu, the bell cricket"></svg>
+          <p class="line" data-timeline></p>
+          <p class="line" aria-hidden="true"></p>
+          <p class="line" data-state></p>
+          <p class="line" data-volume></p>
+          <p class="line" data-modes></p>
+          <p class="line" data-format></p>
+        </div>
+      </section>
+      <section class="pane pane-queue" data-pane="queue" aria-label="Queue">
+        <p class="pane-title" data-title></p>
+        <div class="rows" data-queue></div>
+      </section>
+    </div>
+
+    <div class="help" data-help hidden>
+      <p class="pane-title"><span>Suzumushi Help</span></p>
+      <dl>
+        <dt>Navigation</dt>
+        <dd><span>Tab or Shift+Tab</span><span>focus Library, Player, or Queue</span></dd>
+        <dd><span>Up or Down, j or k</span><span>move the selection</span></dd>
+        <dd><span>Home or End, g or G</span><span>jump to the first or last item</span></dd>
+        <dt>Library and search</dt>
+        <dd><span>/</span><span>search artist, title, filename, and path</span></dd>
+        <dd><span>Enter</span><span>toggle folders; add tracks or playlists</span></dd>
+        <dd><span>Esc</span><span>close search</span></dd>
+        <dt>Queue</dt>
+        <dd><span>J or K</span><span>move the selected item down or up</span></dd>
+        <dd><span>d or Delete</span><span>remove item&nbsp;&nbsp;&nbsp; c clear Queue</span></dd>
+        <dt>Playback</dt>
+        <dd><span>Space or Enter outside Library</span><span>play or pause</span></dd>
+        <dd><span>s</span><span>stop&nbsp;&nbsp;&nbsp; p previous&nbsp;&nbsp;&nbsp; n next</span></dd>
+        <dd><span>Left or Right</span><span>seek back or forward five seconds</span></dd>
+        <dd><span>- or +</span><span>volume down or up&nbsp;&nbsp;&nbsp; m mute</span></dd>
+        <dd><span>x</span><span>shuffle&nbsp;&nbsp;&nbsp; r repeat</span></dd>
+        <dd><span>? or Esc</span><span>close help&nbsp;&nbsp;&nbsp; q quit</span></dd>
+      </dl>
+    </div>
+
+    <div class="closed" data-closed hidden>
+      <p><span class="prompt">$</span> suzumushi --root ./suzumushi</p>
+      <p class="closed-note">Suzumushi saved your queue and position. Press Enter to open it again.</p>
+    </div>
+
+    <div class="status" data-statusbar>
+      <p class="line" data-status-keys></p>
+      <p class="line" data-status-playback></p>
+    </div>
+    <p class="sr-only" aria-live="polite" data-announce></p>
+  </div>
+
+  <figcaption class="live-caption">
+    <div class="keys" aria-label="Player keys">
+      {
+        keys.map((item) => (
+          <button type="button" class="key" data-key={item.key} aria-label={item.name} title={item.name}>
+            {item.label}
+          </button>
+        ))
+      }
+    </div>
+    <p id="live-hint" class="hint">
+      A browser replica of the real player. Click it and use your keyboard: <kbd>Space</kbd> resumes, <kbd>/</kbd> searches, <kbd>q</kbd> quits. <kbd>Esc</kbd> leaves the demo.{" "}
+      <a class="text-link" href={player.src} target="_blank" rel="noreferrer">Real screenshot ↗</a>
+    </p>
+  </figcaption>
+</figure>
+
+<script>
+  type Track = { id: string; title: string; duration: number; rate: number };
+  type Row =
+    | { kind: "libraryRoot" }
+    | { kind: "playlistsRoot" }
+    | { kind: "folder"; id: string; name: string; depth: number; parents: string[] }
+    | { kind: "track"; track: string; depth: number; parents: string[] }
+    | { kind: "playlist"; name: string; tracks: string[] };
+  type Focus = "library" | "player" | "queue";
+  type Status = "Stopped" | "Playing" | "Paused";
+
+  const TRACKS: Record<string, Track> = {
+    ep1: { id: "ep1", title: "CASTELCHEAP | EPISODE 1", duration: 1394, rate: 44100 },
+    ep2: { id: "ep2", title: "CASTELCHEAP | EPISODE 2", duration: 1312, rate: 44100 },
+    ep3: { id: "ep3", title: "CASTELCHEAP | EPISODE 3", duration: 1447, rate: 44100 },
+    bang: { id: "bang", title: "Mani - Bang Bang", duration: 220, rate: 48000 },
+  };
+
+  const TREE: Row[] = [
+    { kind: "libraryRoot" },
+    { kind: "folder", id: "long", name: "Long Listening", depth: 1, parents: [] },
+    { kind: "folder", id: "tales", name: "Tales of Pi", depth: 2, parents: ["long"] },
+    { kind: "folder", id: "castle", name: "Castle Cheap", depth: 3, parents: ["long", "tales"] },
+    { kind: "track", track: "ep1", depth: 4, parents: ["long", "tales", "castle"] },
+    { kind: "track", track: "ep2", depth: 4, parents: ["long", "tales", "castle"] },
+    { kind: "track", track: "ep3", depth: 4, parents: ["long", "tales", "castle"] },
+    { kind: "folder", id: "music", name: "Music", depth: 1, parents: [] },
+    { kind: "track", track: "bang", depth: 2, parents: ["music"] },
+    { kind: "playlistsRoot" },
+    { kind: "playlist", name: "demo", tracks: ["ep2", "ep3"] },
+  ];
+
+  // Suzu's frames, copied from src/ui/mascot.rs. The bell is drawn in yellow.
+  type ArtLine = [string, string, string];
+  const b = (text: string): ArtLine => [text, "", ""];
+  const RESTING: ArtLine[] = [
+    b("       ╲       ╱"),
+    b("        ╲ ▄▄▄ ╱"),
+    b("        ▐▀• •▀▌"),
+    b("      ▄▄█  ▴  █▄▄"),
+    ["     ╱  ▐█▄▄▄█▌  ╲──", "╮", ""],
+    ["        ▐█ █ █▌     ", "│", ""],
+    ["       ▄▀  █  ▀▄   ", "▟█▙", ""],
+    ["      ▀   ▀ ▀   ▀   ", "▀", ""],
+  ];
+  const DANCE: ArtLine[][] = [
+    [
+      b("     ╲           ╱"),
+      b("      ╲   ▄▄▄   ╱"),
+      b("       ╲ ▐▀^ ^▀▌"),
+      b("    ╲   ▄█  ▴  █▄"),
+      ["     ╲▄▀▐█▄▄▄█▌ ▀──", "╮", ""],
+      ["        ▐█ █ █▌    ", "│", ""],
+      ["      ▄▀  █  █ ▀▄ ", "▟█▙", ""],
+      ["     ▀   ▀    ▀    ", "▀", ""],
+    ],
+    [
+      b("        ╲   ╱"),
+      b("     ╲   ╲▄╱   ╱"),
+      b("      ╲ ▐▀^ ^▀▌ ╱"),
+      b("       ╲█  ▴  █╱"),
+      ["        ▐█▄▄▄█▌───", "╮", ""],
+      ["       ▄▀█ █ █▀▄  ", "│", ""],
+      ["     ▄▀  ▀   ▀  ▀▄", "▟█▙", ""],
+      ["    *             * ", "▀", ""],
+    ],
+    [
+      b("       ╲           ╱"),
+      b("        ╲   ▄▄▄   ╱"),
+      b("         ▐▀^ ^▀▌ ╱"),
+      b("         ▄█  ▴  █▄   ╱"),
+      ["     ", "╭", "──▀ ▐█▄▄▄█▌▀▄╱"],
+      ["     ", "│", "    ▐█ █ █▌"],
+      ["    ", "▟█▙", " ▄▀ █  █  ▀▄"],
+      ["     ", "▀", "     ▀    ▀   ▀"],
+    ],
+    [
+      b("        ╲       ╱"),
+      b("         ╲ ▄▄▄ ╱"),
+      b("         ▐▀• •▀▌"),
+      ["     ▄▄▄▄█  ▿  █▄▄▄▄──", "╮", ""],
+      ["    ╱    ▐█▄▄▄█▌      ", "│", ""],
+      ["         ▐█ █ █▌     ", "▟█▙", ""],
+      ["      ▄▄▀  █ █  ▀▄▄   ", "▀", ""],
+      b("     ▀    ▀   ▀    ▀"),
+    ],
+  ];
+
+  // One terminal cell is 6 × 15 units, the same 0.6em × 1.5em as the page's monospace text.
+  const CW = 6;
+  const CH = 15;
+  const COLS = 32;
+
+  function glyph(char: string, col: number, row: number): string {
+    const x = col * CW;
+    const y = row * CH;
+    const mx = x + CW / 2;
+    const my = y + CH / 2;
+    const rect = (rx: number, ry: number, w: number, h: number) =>
+      `<rect x="${rx}" y="${ry}" width="${w}" height="${h}"/>`;
+    const line = (x1: number, y1: number, x2: number, y2: number) =>
+      `<path class="s" d="M${x1} ${y1}L${x2} ${y2}"/>`;
+    switch (char) {
+      case "█":
+        return rect(x, y, CW, CH);
+      case "▀":
+        return rect(x, y, CW, CH / 2);
+      case "▄":
+        return rect(x, my, CW, CH / 2);
+      case "▌":
+        return rect(x, y, CW / 2, CH);
+      case "▐":
+        return rect(mx, y, CW / 2, CH);
+      case "▟":
+        return rect(mx, y, CW / 2, CH / 2) + rect(x, my, CW, CH / 2);
+      case "▙":
+        return rect(x, y, CW / 2, CH / 2) + rect(x, my, CW, CH / 2);
+      case "╲":
+        return line(x, y, x + CW, y + CH);
+      case "╱":
+        return line(x, y + CH, x + CW, y);
+      case "─":
+        return line(x, my, x + CW, my);
+      case "│":
+        return line(mx, y, mx, y + CH);
+      case "╮":
+        return `<path class="s" d="M${x} ${my}H${mx - 1.5}Q${mx} ${my} ${mx} ${my + 1.5}V${y + CH}"/>`;
+      case "╭":
+        return `<path class="s" d="M${x + CW} ${my}H${mx + 1.5}Q${mx} ${my} ${mx} ${my + 1.5}V${y + CH}"/>`;
+      case "•":
+        return `<circle cx="${mx}" cy="${my}" r="1"/>`;
+      case "^":
+        return `<path class="s" d="M${mx - 1.6} ${my - 0.6}L${mx} ${my - 2.4}L${mx + 1.6} ${my - 0.6}"/>`;
+      case "▴":
+        return `<path d="M${mx - 1.4} ${my + 1}L${mx} ${my - 1.2}L${mx + 1.4} ${my + 1}Z"/>`;
+      case "▿":
+        return `<path class="s" d="M${mx - 1.4} ${my - 1}L${mx} ${my + 1.2}L${mx + 1.4} ${my - 1}Z"/>`;
+      case "*":
+        return (
+          line(mx, my - 1.8, mx, my + 1.8) +
+          line(mx - 1.6, my - 0.9, mx + 1.6, my + 0.9) +
+          line(mx - 1.6, my + 0.9, mx + 1.6, my - 0.9)
+        );
+      default:
+        return "";
+    }
+  }
+
+  // ratatui centers each line on its own width, so Suzu's pose shifts line by line.
+  function drawFrame(frame: ArtLine[]): string {
+    let body = "";
+    let bell = "";
+    frame.forEach((parts, row) => {
+      const width = [...parts.join("")].length;
+      let col = Math.floor((COLS - width) / 2);
+      parts.forEach((part, index) => {
+        for (const char of part) {
+          const shape = glyph(char, col, row);
+          if (index === 1) bell += shape;
+          else body += shape;
+          col += 1;
+        }
+      });
+    });
+    return `<g class="body">${body}</g><g class="bell">${bell}</g>`;
+  }
+
+  const FRAME_SVG = {
+    resting: drawFrame(RESTING),
+    dance: DANCE.map(drawFrame),
+  };
+
+  function drawSpectrum(levels: number[]): string {
+    const start = Math.floor((COLS - (levels.length * 2 - 1)) / 2);
+    const bars = levels
+      .map((level, index) => {
+        const h = (CH * (level + 1)) / 8;
+        return `<rect x="${(start + index * 2) * CW}" y="${8 * CH + (CH - h)}" width="${CW}" height="${h}"/>`;
+      })
+      .join("");
+    return `<g class="body">${bars}</g>`;
+  }
+
+  const root = document.querySelector<HTMLElement>("[data-live]");
+  const term = root?.querySelector<HTMLElement>("[data-term]");
+
+  if (root && term) {
+    const terminal = term;
+    const $ = <T extends Element = HTMLElement>(selector: string) => term.querySelector<T>(selector)!;
+    const panes = {
+      library: $("[data-pane='library']"),
+      player: $("[data-pane='player']"),
+      queue: $("[data-pane='queue']"),
+    };
+    const els = {
+      rows: $("[data-rows]"),
+      queue: $("[data-queue]"),
+      now: $("[data-now]"),
+      suzu: $<SVGSVGElement>("[data-suzu]"),
+      timeline: $("[data-timeline]"),
+      state: $("[data-state]"),
+      volume: $("[data-volume]"),
+      modes: $("[data-modes]"),
+      format: $("[data-format]"),
+      screen: $("[data-screen]"),
+      help: $("[data-help]"),
+      closed: $("[data-closed]"),
+      statusbar: $("[data-statusbar]"),
+      statusKeys: $("[data-status-keys]"),
+      statusPlayback: $("[data-status-playback]"),
+      announce: $("[data-announce]"),
+    };
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const state = {
+      focus: "library" as Focus,
+      collapsed: new Set<string>(),
+      librarySelection: 8,
+      queue: ["bang"] as string[],
+      queueSelection: 0,
+      current: "bang" as string | null,
+      position: 86,
+      status: "Paused" as Status,
+      volume: 50,
+      muted: false,
+      shuffle: false,
+      repeat: "off" as "off" | "queue" | "one",
+      help: false,
+      closed: false,
+      search: null as null | { query: string; selection: number },
+      notice: "Session restored; Space resumes",
+      noticeTimer: 0,
+      frame: 0,
+      levels: new Array<number>(16).fill(0),
+    };
+
+    const escapeHtml = (text: string) =>
+      text.replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]!);
+    const time = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+
+    function visibleRows(): Row[] {
+      if (state.search) {
+        const query = state.search.query.toLowerCase();
+        if (!query) return TREE;
+        return TREE.filter((row) => row.kind === "track" && TRACKS[row.track].title.toLowerCase().includes(query));
+      }
+      return TREE.filter((row) => !("parents" in row) || !row.parents.some((id) => state.collapsed.has(id)));
+    }
+
+    function librarySelection(): number {
+      return state.search ? state.search.selection : state.librarySelection;
+    }
+
+    function setLibrarySelection(value: number) {
+      const max = Math.max(visibleRows().length - 1, 0);
+      const next = Math.min(Math.max(value, 0), max);
+      if (state.search) state.search.selection = next;
+      else state.librarySelection = next;
+    }
+
+    function rowText(row: Row): string {
+      const indent = (depth: number) => "  ".repeat(depth);
+      switch (row.kind) {
+        case "libraryRoot":
+          return "Library/";
+        case "playlistsRoot":
+          return "Playlists/";
+        case "folder":
+          return `${indent(row.depth)}${state.collapsed.has(row.id) ? "▸" : "▾"} ${row.name}/`;
+        case "track":
+          return `${indent(state.search ? 0 : row.depth)}- ${TRACKS[row.track].title}`;
+        case "playlist":
+          return `  ${row.name}/`;
+      }
+    }
+
+    function notify(message: string, persistent = false) {
+      state.notice = message;
+      els.announce.textContent = message;
+      window.clearTimeout(state.noticeTimer);
+      if (!persistent) {
+        // Informational notices clear after three seconds.
+        state.noticeTimer = window.setTimeout(() => {
+          state.notice = "";
+          render();
+        }, 3000);
+      }
+    }
+
+    function append(ids: string[]): boolean {
+      if (ids.some((id) => state.queue.includes(id))) {
+        notify("Audio already in Queue");
+        return false;
+      }
+      const start = state.queue.length;
+      state.queue.push(...ids);
+      if (!state.current) {
+        state.queueSelection = start;
+        startTrack(state.queue[start], true);
+      }
+      return true;
+    }
+
+    function startTrack(id: string, play: boolean) {
+      state.current = id;
+      state.position = 0;
+      state.status = play ? "Playing" : "Paused";
+      state.queueSelection = state.queue.indexOf(id);
+    }
+
+    function stop(message = "Stopped") {
+      if (!state.current) {
+        notify("Nothing is playing");
+        return;
+      }
+      state.status = "Stopped";
+      state.position = 0;
+      notify(message);
+    }
+
+    function playPause() {
+      if (!state.current) {
+        if (!state.queue.length) {
+          notify("Queue a track before starting playback");
+          return;
+        }
+        startTrack(state.queue[state.queueSelection] ?? state.queue[0], true);
+        notify("Playing");
+        return;
+      }
+      if (state.status === "Playing") {
+        state.status = "Paused";
+        notify("Paused");
+      } else {
+        state.status = "Playing";
+        notify("Playing");
+      }
+    }
+
+    function neighbour(step: 1 | -1): string | null {
+      if (!state.current) return null;
+      if (state.shuffle && step === 1 && state.queue.length > 1) {
+        const others = state.queue.filter((id) => id !== state.current);
+        return others[Math.floor(Math.random() * others.length)];
+      }
+      const index = state.queue.indexOf(state.current) + step;
+      if (index >= 0 && index < state.queue.length) return state.queue[index];
+      if (state.repeat === "queue" && state.queue.length) return step === 1 ? state.queue[0] : state.queue.at(-1)!;
+      return null;
+    }
+
+    function skip(step: 1 | -1) {
+      const next = neighbour(step);
+      if (!next) {
+        notify("End of queue");
+        return;
+      }
+      // Next and previous stay silent while playback is paused.
+      startTrack(next, state.status === "Playing");
+      notify(state.status === "Playing" ? `Playing: ${TRACKS[next].title}` : `Selected: ${TRACKS[next].title}`);
+    }
+
+    function seek(seconds: number) {
+      if (!state.current || state.status === "Stopped") {
+        notify("Nothing seekable is playing");
+        return;
+      }
+      const track = TRACKS[state.current];
+      state.position = Math.min(Math.max(state.position + seconds, 0), track.duration);
+      notify("Seeked");
+    }
+
+    function finishTrack() {
+      if (!state.current) return;
+      if (state.repeat === "one") {
+        state.position = 0;
+        return;
+      }
+      const next = neighbour(1);
+      if (next) {
+        startTrack(next, true);
+      } else {
+        state.status = "Stopped";
+        state.position = 0;
+        notify("Queue finished");
+      }
+    }
+
+    function activateLibrary() {
+      const row = visibleRows()[librarySelection()];
+      if (!row) {
+        notify("No search result selected");
+        return;
+      }
+      switch (row.kind) {
+        case "folder":
+          if (state.collapsed.has(row.id)) state.collapsed.delete(row.id);
+          else state.collapsed.add(row.id);
+          notify(state.collapsed.has(row.id) ? "Folder collapsed" : "Folder expanded");
+          break;
+        case "track":
+          if (append([row.track])) notify(`Queued: ${TRACKS[row.track].title}`);
+          break;
+        case "playlist":
+          if (append(row.tracks)) notify(`Queued playlist: ${row.name} (${row.tracks.length} tracks)`);
+          break;
+        default:
+          notify("Select a track or playlist to add it to the queue");
+      }
+    }
+
+    function moveSelection(step: number, absolute?: "first" | "last") {
+      if (state.focus === "library") {
+        const last = visibleRows().length - 1;
+        setLibrarySelection(absolute === "first" ? 0 : absolute === "last" ? last : librarySelection() + step);
+      } else if (state.focus === "queue" && state.queue.length) {
+        const last = state.queue.length - 1;
+        const next = absolute === "first" ? 0 : absolute === "last" ? last : state.queueSelection + step;
+        state.queueSelection = Math.min(Math.max(next, 0), last);
+      }
+    }
+
+    function reopen() {
+      state.closed = false;
+      state.help = false;
+      state.search = null;
+      if (state.status === "Playing") state.status = "Paused";
+      if (state.current) notify("Session restored; Space resumes", true);
+    }
+
+    function quit() {
+      // Closing the player keeps the queue, current track, and position.
+      state.closed = true;
+      if (state.status === "Playing") state.status = "Paused";
+      state.notice = "";
+      els.announce.textContent = "Suzumushi closed";
+    }
+
+    function leave() {
+      const focusable = root!.querySelector<HTMLElement>(".key");
+      focusable?.focus();
+    }
+
+    function handleKey(event: KeyboardEvent): boolean {
+      const { key } = event;
+      if (event.ctrlKey || event.metaKey || event.altKey) return false;
+
+      if (state.closed) {
+        if (key === "Enter") {
+          reopen();
+          return true;
+        }
+        if (key === "Escape") {
+          leave();
+          return true;
+        }
+        return key === "Tab" ? false : true;
+      }
+
+      if (state.help) {
+        if (key === "?" || key === "Escape") {
+          state.help = false;
+          notify("Help closed");
+        } else if (key === "q") {
+          quit();
+        }
+        return true;
+      }
+
+      if (state.search) {
+        if (key === "Escape") {
+          state.search = null;
+          notify("Search closed");
+        } else if (key === "Enter") {
+          activateLibrary();
+        } else if (key === "ArrowUp" || key === "ArrowDown") {
+          moveSelection(key === "ArrowUp" ? -1 : 1);
+        } else if (key === "Backspace") {
+          state.search.query = state.search.query.slice(0, -1);
+          state.search.selection = 0;
+        } else if (key.length === 1) {
+          state.search.query += key;
+          state.search.selection = 0;
+        } else if (key === "Tab") {
+          return true;
+        } else {
+          return false;
+        }
+        return true;
+      }
+
+      const focusOrder: Focus[] = ["library", "player", "queue"];
+      switch (key) {
+        case "Tab": {
+          const index = focusOrder.indexOf(state.focus);
+          state.focus = focusOrder[(index + (event.shiftKey ? 2 : 1)) % 3];
+          break;
+        }
+        case "Escape":
+          leave();
+          return true;
+        case "ArrowUp":
+        case "k":
+          moveSelection(-1);
+          break;
+        case "ArrowDown":
+        case "j":
+          moveSelection(1);
+          break;
+        case "Home":
+        case "g":
+          moveSelection(0, "first");
+          break;
+        case "End":
+        case "G":
+          moveSelection(0, "last");
+          break;
+        case "Enter":
+          if (state.focus === "library") activateLibrary();
+          else playPause();
+          break;
+        case " ":
+          playPause();
+          break;
+        case "/":
+          state.focus = "library";
+          state.search = { query: "", selection: 0 };
+          notify("Type to search; Esc closes");
+          break;
+        case "?":
+          state.help = true;
+          notify("Help opened; press ? or Esc to close");
+          break;
+        case "s":
+          stop();
+          break;
+        case "n":
+          skip(1);
+          break;
+        case "p":
+          skip(-1);
+          break;
+        case "ArrowRight":
+          seek(5);
+          break;
+        case "ArrowLeft":
+          seek(-5);
+          break;
+        case "+":
+        case "=":
+        case "-":
+          state.volume = Math.min(Math.max(state.volume + (key === "-" ? -5 : 5), 0), 100);
+          notify(`Volume: ${state.volume}%`);
+          break;
+        case "m":
+          state.muted = !state.muted;
+          notify(state.muted ? "Muted" : "Unmuted");
+          break;
+        case "x":
+          state.shuffle = !state.shuffle;
+          notify(state.shuffle ? "Shuffle: on" : "Shuffle: off");
+          break;
+        case "r":
+          state.repeat = state.repeat === "off" ? "queue" : state.repeat === "queue" ? "one" : "off";
+          notify(`Repeat: ${state.repeat}`);
+          break;
+        case "J":
+        case "K":
+          if (state.focus !== "queue" || !state.queue.length) return true;
+          {
+            const from = state.queueSelection;
+            const to = from + (key === "J" ? 1 : -1);
+            if (to < 0 || to >= state.queue.length) return true;
+            [state.queue[from], state.queue[to]] = [state.queue[to], state.queue[from]];
+            state.queueSelection = to;
+            notify("Queue order changed");
+          }
+          break;
+        case "d":
+        case "Delete":
+          if (state.focus !== "queue" || !state.queue.length) return true;
+          {
+            const [removed] = state.queue.splice(state.queueSelection, 1);
+            if (removed === state.current) {
+              state.current = null;
+              state.status = "Stopped";
+              state.position = 0;
+            }
+            state.queueSelection = Math.min(state.queueSelection, Math.max(state.queue.length - 1, 0));
+            notify(`Removed: ${TRACKS[removed].title}`);
+          }
+          break;
+        case "c":
+          if (state.focus !== "queue") return true;
+          state.queue = [];
+          state.queueSelection = 0;
+          state.current = null;
+          state.status = "Stopped";
+          state.position = 0;
+          notify("Queue cleared");
+          break;
+        case "q":
+          quit();
+          break;
+        default:
+          return false;
+      }
+      return true;
+    }
+
+    function renderRows(container: HTMLElement, texts: string[], selected: number, focused: boolean, emptyText: string) {
+      if (!texts.length) {
+        container.innerHTML = emptyText
+          .split("\n")
+          .map((text) => `<div class="row">${escapeHtml(text)}</div>`)
+          .join("");
+        return;
+      }
+      container.innerHTML = texts
+        .map((text, index) => {
+          const active = focused && index === selected;
+          return `<div class="row${active ? " is-selected" : ""}">${escapeHtml(text)}</div>`;
+        })
+        .join("");
+      container.querySelector(".is-selected")?.scrollIntoView({ block: "nearest" });
+    }
+
+    function renderSuzu() {
+      const playing = state.status === "Playing";
+      const art = playing ? FRAME_SVG.dance[state.frame % 4] : FRAME_SVG.resting;
+      els.suzu.innerHTML = art + (playing ? drawSpectrum(state.levels) : "");
+    }
+
+    function render() {
+      els.screen.hidden = state.help || state.closed;
+      els.statusbar.hidden = state.help || state.closed;
+      els.help.hidden = !state.help;
+      els.closed.hidden = !state.closed;
+      terminal.dataset.focus = state.focus;
+
+      (Object.keys(panes) as Focus[]).forEach((name) => {
+        const focused = state.focus === name;
+        const title = { library: "Library", player: "Player", queue: "Queue" }[name];
+        panes[name].classList.toggle("is-focused", focused);
+        panes[name].querySelector("[data-title]")!.innerHTML = `<span>${focused ? "&gt; " : ""}${title}</span>`;
+      });
+
+      const rows = visibleRows();
+      renderRows(
+        els.rows,
+        rows.map(rowText),
+        librarySelection(),
+        state.focus === "library",
+        state.search ? "No matches\nTry artist, title, filename, or path." : "",
+      );
+      renderRows(
+        els.queue,
+        state.queue.map((id, index) => `${index + 1}. ${TRACKS[id].title}`),
+        state.queueSelection,
+        state.focus === "queue",
+        "Queue is empty\nSelect a track and press Enter.",
+      );
+
+      const track = state.current ? TRACKS[state.current] : null;
+      els.now.textContent = track ? track.title : "Nothing playing";
+      // Same sizing rule as the player: the bar shrinks to fit the panel, between 4 and 28 cells.
+      const times = `${time(state.position)} / ${track ? time(track.duration) : "--:--"}`;
+      const cellWidth = parseFloat(getComputedStyle(terminal).fontSize) * 0.6;
+      const columns = Math.floor(panes.player.clientWidth / cellWidth) - 2;
+      const width = Math.min(Math.max(columns - times.length - 4, 4), 28);
+      const filled = track ? Math.round((state.position / track.duration) * width) : 0;
+      els.timeline.textContent = `[${"=".repeat(filled)}${"-".repeat(width - filled)}]  ${times}`;
+      els.state.textContent = `State: ${state.status}`;
+      els.state.dataset.status = state.status;
+      els.volume.textContent = state.muted ? `Muted (${state.volume}%)` : `Volume ${state.volume}%`;
+      els.modes.textContent = `Shuffle ${state.shuffle ? "on" : "off"}  Repeat ${state.repeat}`;
+      els.format.textContent = track ? `${track.rate} Hz  2 ch` : "";
+      renderSuzu();
+
+      const notice = state.notice ? `<span class="notice">${escapeHtml(state.notice)}</span>` : "";
+      if (state.search) {
+        els.statusKeys.innerHTML = ` Search: ${escapeHtml(state.search.query)}<span class="cursor"></span>`;
+        els.statusPlayback.innerHTML = ` Enter add · Esc close · Ctrl+c quit  ${notice}`;
+      } else {
+        const keys = {
+          library: " Tab focus · / search · ↑/↓ move · Enter open/add  ",
+          player: " Tab focus · ←/→ seek · -/+ volume · m mute · Enter play/pause  ",
+          queue: " Tab focus · ↑/↓ select · J/K reorder · d remove · c clear  ",
+        }[state.focus];
+        const playback =
+          state.focus === "library"
+            ? "q · ? · Space play/pause · s stop · p previous · n next · x shuffle · r repeat"
+            : "q · ? · Space/↵ play/pause · s stop · p previous · n next · x shuffle · r repeat";
+        els.statusKeys.innerHTML = `${escapeHtml(keys)}${notice}`;
+        els.statusPlayback.textContent = playback;
+      }
+    }
+
+    term.addEventListener("keydown", (event) => {
+      if (handleKey(event)) {
+        event.preventDefault();
+        render();
+      }
+    });
+
+    root.querySelectorAll<HTMLButtonElement>("[data-key]").forEach((button) => {
+      button.addEventListener("click", () => {
+        handleKey(new KeyboardEvent("keydown", { key: button.dataset.key }));
+        render();
+      });
+    });
+
+    // Audio clock, dance frames, and spectrum run only while the player is on screen.
+    let visible = false;
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+    }).observe(term);
+
+    window.setInterval(() => {
+      if (state.status !== "Playing" || state.closed) return;
+      state.position += 1;
+      const track = state.current ? TRACKS[state.current] : null;
+      if (track && state.position >= track.duration) finishTrack();
+      if (visible) render();
+    }, 1000);
+
+    let tick = 0;
+    window.setInterval(() => {
+      if (!visible || state.status !== "Playing" || state.closed || document.hidden) return;
+      tick += 1;
+      const loud = state.muted ? 0 : state.volume / 100;
+      state.levels = state.levels.map((previous, band) => {
+        const beat = tick % 5 === 0 ? 2.2 : 0;
+        const shape = 6.2 - band * 0.26 + Math.sin(tick * 0.7 + band * 0.9) * 1.3;
+        const target = Math.max(0, Math.min(7, (shape + beat + (Math.random() * 2.4 - 1.2)) * (0.45 + loud * 0.75)));
+        return Math.round(Math.max(target, previous - 1.5));
+      });
+      if (!reducedMotion.matches && tick % 2 === 0) state.frame += 1;
+      renderSuzu();
+    }, 100);
+
+    window.addEventListener("resize", render, { passive: true });
+    render();
+  }
+</script>
+
+<style>
+  .live {
+    margin: 0;
+  }
+
+  .term {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 36rem;
+    border: 1px solid var(--line);
+    background: #0b0f10;
+    padding: 1rem 0.75rem 0.5rem;
+    color: #dcdad0;
+    font: 400 var(--size-sm) / 1.5 var(--font-mono);
+    cursor: default;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .term:focus-visible,
+  .term:focus-within {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 22%, transparent);
+  }
+
+  .screen {
+    display: grid;
+    flex: 1;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+    gap: 0.6ch;
+  }
+
+  .screen[hidden],
+  .status[hidden] {
+    display: none;
+  }
+
+  .pane {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
+    border: 1px solid #5d6563;
+    padding: 0.55rem 0.5ch 0.25rem;
+  }
+
+  .pane.is-focused {
+    border-color: #dcdad0;
+    box-shadow: inset 0 0 0 1px #dcdad0;
+  }
+
+  .pane-title {
+    position: absolute;
+    top: -0.75em;
+    left: 0.9ch;
+    margin: 0;
+    background: #0b0f10;
+    padding-inline: 1ch;
+    white-space: pre;
+  }
+
+  .pane.is-focused .pane-title {
+    font-weight: 600;
+  }
+
+  .rows {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .rows :global(.row),
+  .line {
+    overflow: hidden;
+    margin: 0;
+    min-height: 1.5em;
+    text-overflow: ellipsis;
+    white-space: pre;
+  }
+
+  .rows :global(.row.is-selected) {
+    background: var(--cyan);
+    color: #0b0f10;
+    font-weight: 600;
+  }
+
+  .player-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .player-body .line {
+    max-width: 100%;
+  }
+
+  .suzu {
+    width: 32ch;
+    height: 13.5em;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .suzu :global(.body) {
+    fill: var(--sage);
+    stroke: var(--sage);
+  }
+
+  .suzu :global(.bell) {
+    fill: var(--brass);
+    stroke: var(--brass);
+  }
+
+  .suzu :global(rect) {
+    stroke: none;
+    shape-rendering: crispEdges;
+  }
+
+  .suzu :global(.s) {
+    fill: none;
+    stroke-width: 0.9;
+    stroke-linecap: square;
+  }
+
+  [data-state][data-status="Playing"] {
+    color: var(--sage);
+  }
+
+  [data-state][data-status="Paused"] {
+    color: var(--brass);
+  }
+
+  .status {
+    padding-top: 0.35rem;
+  }
+
+  .status .line {
+    min-height: 1.5em;
+  }
+
+  .status :global(.notice) {
+    color: #dcdad0;
+  }
+
+  .status :global(.cursor) {
+    display: inline-block;
+    width: 1ch;
+    height: 1.2em;
+    margin-left: 1px;
+    vertical-align: text-bottom;
+    background: #dcdad0;
+  }
+
+  .help {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    border: 1px solid #dcdad0;
+    padding: 0.75rem 1ch 0.5rem;
+  }
+
+  .help .pane-title {
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 600;
+  }
+
+  .help dl {
+    margin: 0;
+  }
+
+  .help dt {
+    margin-top: 0.75em;
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  .help dt:first-child {
+    margin-top: 0;
+  }
+
+  .help dd {
+    display: grid;
+    grid-template-columns: minmax(12ch, 30ch) 1fr;
+    gap: 2ch;
+    margin: 0 0 0 2ch;
+  }
+
+  .closed {
+    flex: 1;
+  }
+
+  .closed p {
+    margin: 0;
+  }
+
+  .prompt {
+    color: var(--sage);
+  }
+
+  .closed-note {
+    margin-top: 1.5em !important;
+    color: var(--muted);
+  }
+
+  .live-caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-top: 1rem;
+  }
+
+  .keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .key {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--line);
+    border-bottom-width: 3px;
+    background: var(--panel);
+    padding: 0 0.7rem;
+    color: var(--ink);
+    font: 400 var(--size-sm) / 1 var(--font-mono);
+    cursor: pointer;
+    transition:
+      border-color 120ms ease,
+      transform 80ms ease;
+  }
+
+  .key:hover {
+    border-color: var(--soft);
+  }
+
+  .key:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+    margin-bottom: 2px;
+  }
+
+  .hint {
+    max-width: 38rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--size-sm);
+  }
+
+  .hint .text-link {
+    white-space: nowrap;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* Narrow screens show one panel at a time, like switching focus with Tab. */
+  @media (max-width: 767px) {
+    .term {
+      height: 30rem;
+      padding-inline: 0.5rem;
+    }
+
+    .screen {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pane:not(.is-focused) {
+      display: none;
+    }
+
+    .status [data-status-playback] {
+      display: none;
+    }
+
+    .status :global(.notice) {
+      display: block;
+    }
+
+    .help dd {
+      grid-template-columns: 1fr;
+      gap: 0;
+      margin-bottom: 0.4em;
+    }
+
+    .help dd span:last-child {
+      color: var(--muted);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .term,
+    .key {
+      transition: none;
+    }
+  }
+</style>
