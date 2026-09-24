@@ -739,7 +739,6 @@ const keys = [
       els.statusbar.hidden = state.help || state.closed;
       els.help.hidden = !state.help;
       els.closed.hidden = !state.closed;
-      terminal.dataset.focus = state.focus;
 
       (Object.keys(panes) as Focus[]).forEach((name) => {
         const focused = state.focus === name;

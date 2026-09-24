@@ -4,8 +4,8 @@
   "description": "A calm, fully local terminal audio player for Linux.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0c0c0b",
-  "theme_color": "#0c0c0b",
+  "background_color": "#0e1214",
+  "theme_color": "#0e1214",
   "icons": [
     {
       "src": "/icon-192.png",
