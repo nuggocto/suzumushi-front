@@ -31,13 +31,18 @@ const keys = [
       <section class="pane pane-player" data-pane="player" aria-label="Player">
         <p class="pane-title" data-title></p>
         <div class="player-body">
-          <p class="line" data-now></p>
+          <div class="stage" data-stage>
+            <div class="stage-grid" data-grid>
+              <canvas class="meadow" data-meadow aria-hidden="true"></canvas>
+              <p class="line stage-title" data-now></p>
+              <svg class="suzu" data-suzu role="img" aria-label="Suzu, the bell cricket, in a night meadow"></svg>
+            </div>
+          </div>
           <p class="line" aria-hidden="true"></p>
-          <svg class="suzu" data-suzu viewBox="0 0 192 135" role="img" aria-label="Suzu, the bell cricket"></svg>
-          <p class="line" data-timeline></p>
-          <p class="line" aria-hidden="true"></p>
-          <p class="line" data-state></p>
-          <p class="line" data-volume></p>
+          <p class="line" data-timeline>
+            <canvas class="rail" data-rail aria-hidden="true"></canvas><span>  </span><span data-elapsed></span><span class="dim"> / </span><span data-total></span>
+          </p>
+          <p class="line"><span data-state></span><span data-volume></span></p>
           <p class="line" data-modes></p>
           <p class="line" data-format></p>
         </div>
@@ -102,6 +107,8 @@ const keys = [
 </figure>
 
 <script>
+  import { BANDS, MEADOW_MAX_ROWS, Meadow, css, drawRail, pastel, type PlayerStatus } from "../scripts/meadow";
+
   type Track = { id: string; title: string; duration: number; rate: number };
   type Row =
     | { kind: "libraryRoot" }
@@ -192,7 +199,6 @@ const keys = [
   // One terminal cell is 6 × 15 units, the same 0.6em × 1.5em as the page's monospace text.
   const CW = 6;
   const CH = 15;
-  const COLS = 32;
 
   function glyph(char: string, col: number, row: number): string {
     const x = col * CW;
@@ -249,13 +255,18 @@ const keys = [
     }
   }
 
-  // ratatui centers each line on its own width, so Suzu's pose shifts line by line.
-  function drawFrame(frame: ArtLine[]): string {
+  // ratatui centers each line on its own width, so Suzu's pose shifts line by
+  // line. Returns the drawing and, per row, the columns her silhouette covers.
+  function drawFrame(frame: ArtLine[], columns: number): { svg: string; spans: [number, number][] } {
     let body = "";
     let bell = "";
+    const spans: [number, number][] = [];
     frame.forEach((parts, row) => {
-      const width = [...parts.join("")].length;
-      let col = Math.floor((COLS - width) / 2);
+      const chars = [...parts.join("")];
+      let col = Math.floor(columns / 2) - Math.floor(chars.length / 2);
+      const first = chars.findIndex((char) => char !== " ");
+      const last = chars.length - 1 - [...chars].reverse().findIndex((char) => char !== " ");
+      spans.push([col + first, col + last]);
       parts.forEach((part, index) => {
         for (const char of part) {
           const shape = glyph(char, col, row);
@@ -265,23 +276,7 @@ const keys = [
         }
       });
     });
-    return `<g class="body">${body}</g><g class="bell">${bell}</g>`;
-  }
-
-  const FRAME_SVG = {
-    resting: drawFrame(RESTING),
-    dance: DANCE.map(drawFrame),
-  };
-
-  function drawSpectrum(levels: number[]): string {
-    const start = Math.floor((COLS - (levels.length * 2 - 1)) / 2);
-    const bars = levels
-      .map((level, index) => {
-        const h = (CH * (level + 1)) / 8;
-        return `<rect x="${(start + index * 2) * CW}" y="${8 * CH + (CH - h)}" width="${CW}" height="${h}"/>`;
-      })
-      .join("");
-    return `<g class="body">${bars}</g>`;
+    return { svg: `<g class="body">${body}</g><g class="bell">${bell}</g>`, spans };
   }
 
   const root = document.querySelector<HTMLElement>("[data-live]");
@@ -299,8 +294,13 @@ const keys = [
       rows: $("[data-rows]"),
       queue: $("[data-queue]"),
       now: $("[data-now]"),
+      stage: $("[data-stage]"),
+      grid: $("[data-grid]"),
+      meadow: $<HTMLCanvasElement>("[data-meadow]"),
       suzu: $<SVGSVGElement>("[data-suzu]"),
-      timeline: $("[data-timeline]"),
+      rail: $<HTMLCanvasElement>("[data-rail]"),
+      elapsed: $("[data-elapsed]"),
+      total: $("[data-total]"),
       state: $("[data-state]"),
       volume: $("[data-volume]"),
       modes: $("[data-modes]"),
@@ -333,9 +333,8 @@ const keys = [
       search: null as null | { query: string; selection: number },
       notice: "Session restored; Space resumes",
       noticeTimer: 0,
-      frame: 0,
-      levels: new Array<number>(16).fill(0),
     };
+    const meadow = new Meadow();
 
     const escapeHtml = (text: string) =>
       text.replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]!);
@@ -728,10 +727,112 @@ const keys = [
       container.querySelector(".is-selected")?.scrollIntoView({ block: "nearest" });
     }
 
-    function renderSuzu() {
+    function playProgress(): number | null {
+      const track = state.current ? TRACKS[state.current] : null;
+      return track ? Math.min(state.position / track.duration, 1) : null;
+    }
+
+    // A few seconds of music, over and over: a kick on each beat, a melody
+    // wandering through the middle, and hi-hats up top, scaled by the volume.
+    function levels(seconds: number): number[] {
+      const loud = state.muted ? 0 : state.volume / 100;
+      return Array.from({ length: BANDS }, (_, band) => {
+        const b = band / (BANDS - 1);
+        const beat = (seconds * 2) % 1;
+        const kick = Math.max(0, 1 - beat * 3) * Math.max(0, 1 - b * 2.5);
+        const center = 0.45 + 0.2 * Math.sin(seconds * 0.7);
+        const melody = Math.exp(-((b - center) ** 2) * 60) * (0.6 + 0.4 * Math.abs(Math.sin(seconds * 5)));
+        const hats = b > 0.7 ? 0.35 * (1 - ((seconds * 4) % 1)) ** 3 : 0;
+        const bed = 0.35 + 0.15 * Math.sin(band * 1.7 + seconds * 3);
+        const level = (bed * (1 - b * 0.4) + kick * 0.7 + melody * 0.5 + hats) * (0.35 + 0.75 * loud);
+        return Math.min(Math.max(level, 0), 1);
+      });
+    }
+
+    // The stage's clock. With reduced motion it only jumps ahead when the
+    // player's state changes, so every transition lands at once and holds still.
+    let sceneSeconds = 0;
+    let sceneStatus: PlayerStatus = state.status;
+
+    function drawScene() {
+      if (state.help || state.closed) return;
+      const size = parseFloat(getComputedStyle(terminal).fontSize);
+      const cell = { width: size * 0.6, height: size * 1.5 };
+      const dpr = window.devicePixelRatio || 1;
+      const columns = Math.floor(els.stage.clientWidth / cell.width);
+      const rows = Math.floor(els.stage.clientHeight / cell.height);
+      if (columns < 8 || rows < 9) {
+        // Too small for Suzu and a meadow: keep just the title in view.
+        Object.assign(els.grid.style, { width: `${els.stage.clientWidth}px`, height: `${els.stage.clientHeight}px` });
+        els.now.style.top = "0";
+        return;
+      }
+      if (reducedMotion.matches && sceneStatus !== state.status) sceneSeconds += 3;
+      sceneStatus = state.status;
+
+      const width = columns * cell.width;
+      const height = rows * cell.height;
+      Object.assign(els.grid.style, { width: `${width}px`, height: `${height}px` });
+      if (els.meadow.width !== Math.round(width * dpr) || els.meadow.height !== Math.round(height * dpr)) {
+        els.meadow.width = Math.round(width * dpr);
+        els.meadow.height = Math.round(height * dpr);
+        Object.assign(els.meadow.style, { width: `${width}px`, height: `${height}px` });
+      }
+
+      // The title floats in the sky just above the meadow, as in the player.
+      const title = els.now.textContent ?? "";
+      const titleRows = 1;
+      const meadowRows = Math.min(rows - titleRows, MEADOW_MAX_ROWS);
+      const titleRow = rows - meadowRows - titleRows;
+      els.now.style.top = `${titleRow * cell.height}px`;
+      const titleLength = Math.min([...title].length, columns);
+      const titleStart = Math.floor(columns / 2) - Math.floor(titleLength / 2);
+
       const playing = state.status === "Playing";
-      const art = playing ? FRAME_SVG.dance[state.frame % 4] : FRAME_SVG.resting;
-      els.suzu.innerHTML = art + (playing ? drawSpectrum(state.levels) : "");
+      const pose = playing && !reducedMotion.matches ? DANCE[Math.floor((sceneSeconds * 1000) / 200) % 4] : RESTING;
+      const suzu = drawFrame(pose, columns);
+      els.suzu.setAttribute("viewBox", `0 0 ${columns * CW} ${8 * CH}`);
+      Object.assign(els.suzu.style, { width: `${width}px`, height: `${8 * cell.height}px` });
+      els.suzu.innerHTML = suzu.svg;
+      const suzuTop = rows - 8;
+
+      const ctx = els.meadow.getContext("2d");
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      meadow.draw(
+        ctx,
+        {
+          columns,
+          rows,
+          titleRows,
+          status: state.status,
+          levels: levels(sceneSeconds),
+          progress: playProgress(),
+          // Suzu and the title keep a clear silhouette in front of the meadow.
+          mask: (column, row) => {
+            if (row === titleRow) return column >= titleStart - 1 && column <= titleStart + titleLength;
+            const span = suzu.spans[row - suzuTop];
+            return span !== undefined && column >= span[0] && column <= span[1];
+          },
+        },
+        cell,
+        sceneSeconds,
+      );
+
+      // The rail follows the player's rule: it fits beside the time, 4 to 30 cells.
+      const paneColumns = Math.floor(panes.player.clientWidth / cell.width) - 2;
+      const times = `${els.elapsed.textContent} / ${els.total.textContent}`;
+      const cells = Math.min(Math.max(paneColumns - times.length - 4, 4), 30);
+      const railWidth = cells * cell.width;
+      if (els.rail.width !== Math.round(railWidth * dpr) || els.rail.height !== Math.round(cell.height * dpr)) {
+        els.rail.width = Math.round(railWidth * dpr);
+        els.rail.height = Math.round(cell.height * dpr);
+        Object.assign(els.rail.style, { width: `${railWidth}px`, height: `${cell.height}px` });
+      }
+      const railContext = els.rail.getContext("2d");
+      if (!railContext) return;
+      railContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawRail(railContext, cells, playProgress(), state.status, sceneSeconds, cell);
     }
 
     function render() {
@@ -765,19 +866,16 @@ const keys = [
 
       const track = state.current ? TRACKS[state.current] : null;
       els.now.textContent = track ? track.title : "Nothing playing";
-      // Same sizing rule as the player: the bar shrinks to fit the panel, between 4 and 28 cells.
-      const times = `${time(state.position)} / ${track ? time(track.duration) : "--:--"}`;
-      const cellWidth = parseFloat(getComputedStyle(terminal).fontSize) * 0.6;
-      const columns = Math.floor(panes.player.clientWidth / cellWidth) - 2;
-      const width = Math.min(Math.max(columns - times.length - 4, 4), 28);
-      const filled = track ? Math.round((state.position / track.duration) * width) : 0;
-      els.timeline.textContent = `[${"=".repeat(filled)}${"-".repeat(width - filled)}]  ${times}`;
+      els.elapsed.textContent = time(state.position);
+      els.total.textContent = track ? time(track.duration) : "--:--";
+      const progress = playProgress();
+      els.elapsed.style.color = progress === null ? "" : css(pastel(progress));
       els.state.textContent = `State: ${state.status}`;
       els.state.dataset.status = state.status;
-      els.volume.textContent = state.muted ? `Muted (${state.volume}%)` : `Volume ${state.volume}%`;
+      els.volume.textContent = state.muted ? `   Muted (${state.volume}%)` : `   Volume ${state.volume}%`;
       els.modes.textContent = `Shuffle ${state.shuffle ? "on" : "off"}  Repeat ${state.repeat}`;
       els.format.textContent = track ? `${track.rate} Hz  2 ch` : "";
-      renderSuzu();
+      drawScene();
 
       const notice = state.notice ? `<span class="notice">${escapeHtml(state.notice)}</span>` : "";
       if (state.search) {
@@ -812,34 +910,40 @@ const keys = [
       });
     });
 
-    // Audio clock, dance frames, and spectrum run only while the player is on screen.
+    // The audio clock always runs; the scene draws only while it is on screen,
+    // about 30 times a second while it moves and 10 once it is still.
     let visible = false;
     new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
     }).observe(term);
 
+    let clock = performance.now();
+    let shownSecond = -1;
     window.setInterval(() => {
+      const now = performance.now();
+      const elapsed = (now - clock) / 1000;
+      clock = now;
       if (state.status !== "Playing" || state.closed) return;
-      state.position += 1;
+      state.position += elapsed;
       const track = state.current ? TRACKS[state.current] : null;
       if (track && state.position >= track.duration) finishTrack();
-      if (visible) render();
-    }, 1000);
-
-    let tick = 0;
-    window.setInterval(() => {
-      if (!visible || state.status !== "Playing" || state.closed || document.hidden) return;
-      tick += 1;
-      const loud = state.muted ? 0 : state.volume / 100;
-      state.levels = state.levels.map((previous, band) => {
-        const beat = tick % 5 === 0 ? 2.2 : 0;
-        const shape = 6.2 - band * 0.26 + Math.sin(tick * 0.7 + band * 0.9) * 1.3;
-        const target = Math.max(0, Math.min(7, (shape + beat + (Math.random() * 2.4 - 1.2)) * (0.45 + loud * 0.75)));
-        return Math.round(Math.max(target, previous - 1.5));
-      });
-      if (!reducedMotion.matches && tick % 2 === 0) state.frame += 1;
-      renderSuzu();
+      if (visible && Math.floor(state.position) !== shownSecond) {
+        shownSecond = Math.floor(state.position);
+        render();
+      }
     }, 100);
+
+    let lastFrame = 0;
+    const frameLoop = (now: number) => {
+      window.requestAnimationFrame(frameLoop);
+      if (!visible || document.hidden) return;
+      const interval = meadow.moving(state.status) ? 33 : 100;
+      if (now - lastFrame < interval) return;
+      if (!reducedMotion.matches) sceneSeconds += Math.min((now - lastFrame) / 1000, 0.1);
+      lastFrame = now;
+      drawScene();
+    };
+    window.requestAnimationFrame(frameLoop);
 
     window.addEventListener("resize", render, { passive: true });
     render();
@@ -855,7 +959,7 @@ const keys = [
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 36rem;
+    height: 42rem;
     border: 1px solid var(--line);
     background: #0b0f10;
     padding: 1rem 0.75rem 0.5rem;
@@ -939,9 +1043,9 @@ const keys = [
   .player-body {
     display: flex;
     flex: 1;
+    min-height: 0;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     text-align: center;
   }
 
@@ -949,11 +1053,46 @@ const keys = [
     max-width: 100%;
   }
 
+  /* The stage fills the Player above the details: night sky, title, meadow. */
+  .stage {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .stage-grid {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .meadow {
+    position: absolute;
+    inset: 0;
+  }
+
+  .stage-title {
+    position: absolute;
+    right: 0;
+    left: 0;
+  }
+
   .suzu {
-    width: 32ch;
-    height: 13.5em;
-    max-width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
     overflow: visible;
+  }
+
+  .rail {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .dim {
+    color: #5d6563;
   }
 
   .suzu :global(.body) {
@@ -1121,7 +1260,7 @@ const keys = [
   /* Narrow screens show one panel at a time, like switching focus with Tab. */
   @media (max-width: 767px) {
     .term {
-      height: 30rem;
+      height: 34rem;
       padding-inline: 0.5rem;
     }
 

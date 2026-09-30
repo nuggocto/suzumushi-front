@@ -4,6 +4,7 @@ import Layout from "../layouts/Layout.astro";
 import ButtonLink from "../components/ButtonLink.astro";
 import CopyButton from "../components/CopyButton.astro";
 import LivePlayer from "../components/LivePlayer.astro";
+import RailSample from "../components/RailSample.astro";
 import suzu from "../assets/suzu.png";
 import { SITE } from "../data/site";
 
@@ -20,7 +21,7 @@ const features = [
   {
     title: "Pick up where you stopped",
     description: "Your queue, current track, and playback position are saved. Reopen the player and press play when you're ready.",
-    sample: [["State: Paused"], ["[==========------------------]  1:26 / 3:40"], ["Session restored; Space resumes"]],
+    sample: [["State: Paused   Volume 50%"], { rail: 86 / 220, time: "1:26 / 3:40" }, ["Session restored; Space resumes"]],
   },
   {
     title: "Use your media keys",
@@ -70,7 +71,7 @@ const steps = [
   <section class="section shell" aria-labelledby="features-title">
     <h2 id="features-title" class="display section-heading">The essentials for everyday listening.</h2>
     <p class="section-lede">
-      Your library on the left, playback in the middle, and the queue on the right. Suzu follows the music.
+      Your library on the left, playback in the middle, and the queue on the right. Suzu dances in a night meadow that grows with the music.
     </p>
     <div class="features">
       {
@@ -82,7 +83,12 @@ const steps = [
             </div>
             <div class="sample">
               {feature.sample.map((line) =>
-                line.length === 2 ? (
+                "rail" in line ? (
+                  <span class="sample-line">
+                    <RailSample cells={20} progress={line.rail} status="Paused" />
+                    {`  ${line.time}`}
+                  </span>
+                ) : line.length === 2 ? (
                   <span class="sample-line">
                     <span class="sample-key">{line[0]}</span>
                     {line[1]}

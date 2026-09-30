@@ -1,0 +1,33 @@
+---
+// A still frame of the player's progress rail, drawn with the demo's own rail
+// so the two always match.
+import { css, railCells, type PlayerStatus } from "../scripts/meadow";
+
+interface Props {
+  cells: number;
+  progress: number;
+  status: PlayerStatus;
+}
+
+const { cells, progress, status } = Astro.props;
+// Six by fifteen units per cell: the page's 0.6em by 1.5em monospace cell.
+const shapes = railCells(cells, progress, status, 0.75);
+---
+
+<svg class="rail-sample" viewBox={`0 0 ${cells * 6} 15`} style={`width: ${cells}ch`} aria-hidden="true">
+  {
+    shapes.flatMap((shape, column) =>
+      shape.dots.map(([dx, dy]) => (
+        <circle cx={column * 6 + (dx === 0 ? 1.8 : 4.2)} cy={15 * (0.14 + dy * 0.24)} r="0.96" fill={css(shape.color)} />
+      )),
+    )
+  }
+</svg>
+
+<style>
+  .rail-sample {
+    display: inline-block;
+    height: 1.5em;
+    vertical-align: top;
+  }
+</style>
