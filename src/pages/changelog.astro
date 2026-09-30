@@ -5,6 +5,22 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.1.7",
+    date: "30 September 2026",
+    label: "Controls that keep up",
+    summary: "Keeps rapid play, pause, stop, and track changes in the order you pressed them, and fixes several edge cases found in a code audit.",
+    changes: [
+      "Keeps play, pause, stop, and navigation in order when you press them faster than the audio worker answers, so pause then play resumes and a double play-pause returns to playing.",
+      "Keeps a paused player paused when you skip tracks again before the next one finishes loading, and lets play and pause during loading choose how the track starts.",
+      "Makes Previous return to the track before the one playing, even after the playing track was removed from the Queue.",
+      "Stops an ignored hidden folder beyond the scan depth limit from ending the scan early and hiding the tracks after it.",
+      "Keeps playback and seeking working after the folder Suzumushi was started from is deleted.",
+      "Reports muted volume as 0 to desktop controls and pauses when a desktop client sets the playback rate to 0, as MPRIS requires.",
+      "Strengthens scan-limit and command-timeout tests.",
+      "Updates the Linux archive, AUR package, and stable Nix installation to 1.1.7.",
+    ],
+  },
+  {
     version: "1.1.6",
     date: "23 September 2026",
     label: "Keep playing through upgrades",
