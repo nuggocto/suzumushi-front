@@ -5,6 +5,18 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.1.8",
+    date: "30 September 2026",
+    label: "Quiet toggles and smooth seeking",
+    summary: "Removes the crackling heard when play-pause is held or pressed rapidly, and fades every pause, resume, and seek instead of cutting abruptly.",
+    changes: [
+      "Removes the static-like crackle when Space or play-pause is held or pressed rapidly, by keeping the audio device stream running through quick toggles.",
+      "Fades output in and out over 8 ms on every pause, resume, track start, seek, and stop, so none of them clicks.",
+      "Keeps held seeking quiet and restarts decoding once at the final position, instead of rebuilding the audio stream on every key repeat.",
+      "Updates the Linux archive, AUR package, and stable Nix installation to 1.1.8.",
+    ],
+  },
+  {
     version: "1.1.7",
     date: "30 September 2026",
     label: "Controls that keep up",
