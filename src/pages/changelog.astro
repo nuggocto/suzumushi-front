@@ -5,6 +5,19 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.2.1",
+    date: "1 October 2026",
+    label: "Clean titles, mute, and seeking",
+    summary: "Fixes wide and accented titles in the Player, makes muting glide instead of cutting, and finishes tracks cleanly when a seek reaches the end.",
+    changes: [
+      "Shows every character of Japanese, Chinese, emoji, and accented titles and artist names in the Player.",
+      "Glides muting, unmuting, and volume changes over 8 ms instead of cutting the sound at once, while muted audio keeps its place.",
+      "Finishes the track when a seek reaches its end, even mid-restart, instead of reporting that it contains no audio.",
+      "Keeps held seeking silent until it settles, so an intermediate position never briefly plays.",
+      "Updates the Linux archive, AUR package, and stable Nix installation to 1.2.1.",
+    ],
+  },
+  {
     version: "1.2.0",
     date: "30 September 2026",
     label: "A night meadow around Suzu",
