@@ -1,20 +1,21 @@
 export const SITE = {
   name: "Suzumushi",
-  version: "1.2.1",
+  version: "1.2.2",
   domain: "suzumushi.org",
   description: "A calm, fully local terminal audio player for Linux.",
   github: "https://github.com/nuggocto/suzumushi",
-  release: "https://github.com/nuggocto/suzumushi/releases/tag/v1.2.1",
+  release: "https://github.com/nuggocto/suzumushi/releases/tag/v1.2.2",
   aur: "https://aur.archlinux.org/packages/suzumushi-bin",
-  nixFlake: "github:nuggocto/suzumushi/v1.2.1",
-  nixDocs: "https://github.com/nuggocto/suzumushi/blob/v1.2.1/docs/nix.md",
+  nixFlake: "github:nuggocto/suzumushi/v1.2.2",
+  nixDocs: "https://github.com/nuggocto/suzumushi/blob/v1.2.2/docs/nix.md",
   license: "https://github.com/nuggocto/suzumushi/blob/shrek/LICENSE",
 } as const;
 
 export const RELEASE = {
-  archive: "suzumushi-v1.2.1-x86_64-unknown-linux-gnu.tar.xz",
-  baseUrl: "https://github.com/nuggocto/suzumushi/releases/download/v1.2.1",
-  checksum: "ef8b0611ad101bbfb8880ef85071b5932af2e87d296c9c1839caea2517da84ae",
+  archive: "suzumushi-v1.2.2-x86_64-unknown-linux-gnu.tar.xz",
+  baseUrl: "https://github.com/nuggocto/suzumushi/releases/download/v1.2.2",
+  checksum: "defddec52332e19269c829b1cdee6ff7db962357cead2c9a404e21510288eb34",
+  installerChecksum: "57303016d62f972b049614b0a1159846fb1ba87d1566ce3c5a049099e73e1984",
 } as const;
 
 export const NAV = [
