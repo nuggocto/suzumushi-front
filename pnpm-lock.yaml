@@ -11,10 +11,10 @@ importers:
       '@astrojs/sitemap':
         specifier: 3.7.3
         version: 3.7.3
-      '@fontsource/dm-sans':
+      '@fontsource/ibm-plex-mono':
         specifier: 5.3.0
         version: 5.3.0
-      '@fontsource/ibm-plex-mono':
+      '@fontsource/shippori-mincho':
         specifier: 5.3.0
         version: 5.3.0
       '@tailwindcss/vite':
@@ -418,11 +418,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fontsource/dm-sans@5.3.0':
-    resolution: {integrity: sha512-lYJtMXXO28q1z+yz+z8XKd0s4hXaa9QdkETzkyD760sidCv5heI86weYA0sx0Nc4pAMAQTUuyf4gO44cYKKS9g==}
-
   '@fontsource/ibm-plex-mono@5.3.0':
     resolution: {integrity: sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==}
+
+  '@fontsource/shippori-mincho@5.3.0':
+    resolution: {integrity: sha512-S41kRxQuubAaYss+LeXu0IOc02RQwsPaJbR1cWZx4VV15hXaYZViH3WAve9HpDVFqKYd/BVk86Bg7lp9ytV3KQ==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -2570,9 +2570,9 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@fontsource/dm-sans@5.3.0': {}
-
   '@fontsource/ibm-plex-mono@5.3.0': {}
+
+  '@fontsource/shippori-mincho@5.3.0': {}
 
   '@img/colour@1.1.0': {}
 

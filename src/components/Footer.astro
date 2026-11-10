@@ -1,26 +1,36 @@
 ---
-import LogoMark from "./LogoMark.astro";
 import { NAV, SITE } from "../data/site";
 ---
 
-<footer class="py-10">
-  <div class="shell grid gap-8 sm:grid-cols-[1fr_auto] sm:items-end">
-    <div>
-      <a href="/" class="inline-flex items-center gap-3 no-underline">
-        <span class="block size-9"><LogoMark /></span>
-        <span class="font-semibold text-ink">Suzumushi</span>
-      </a>
-      <p class="mt-4 max-w-md text-sm leading-relaxed text-muted">
-        A local terminal audio player for Linux.
-      </p>
-    </div>
-    <div class="sm:text-right">
-      <nav class="flex flex-wrap gap-x-5 gap-y-2 sm:justify-end" aria-label="Footer navigation">
-        {NAV.map((item) => <a class="nav-link" href={item.href}>{item.label}</a>)}
-        <a class="nav-link" href={SITE.github} target="_blank" rel="noreferrer">GitHub ↗</a>
-        <a class="nav-link" href={SITE.license} target="_blank" rel="noreferrer">Apache-2.0 ↗</a>
-      </nav>
-      <p class="mt-4 text-sm text-muted">Free and open source.</p>
-    </div>
-  </div>
+<footer class="site-footer shell small">
+  <p>Suzumushi {SITE.version}, a local terminal audio player for Linux. Free and open source.</p>
+  <nav class="links" aria-label="Footer navigation">
+    {NAV.map((item) => <a href={item.href}>{item.label}</a>)}
+    <a href={SITE.github} target="_blank" rel="noreferrer">GitHub</a>
+    <a href={SITE.license} target="_blank" rel="noreferrer">Apache-2.0 license</a>
+  </nav>
 </footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem 3rem;
+    padding-block: 4rem 2.5rem;
+  }
+
+  .site-footer p {
+    margin: 0;
+  }
+
+  .site-footer a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .site-footer a:hover {
+    color: var(--ink);
+  }
+</style>

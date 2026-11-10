@@ -1,15 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import ButtonLink from "../components/ButtonLink.astro";
 ---
 
 <Layout title="Not found" noindex>
-  <section class="shell flex min-h-[calc(100svh-10rem)] items-center justify-center py-20 text-center">
-    <div>
-      <p class="eyebrow">404 · Page not found</p>
-      <h1 class="page-title mt-4">Nothing is playing here.</h1>
-      <p class="mx-auto mt-5 max-w-md leading-relaxed text-muted">This path holds no track. Return home and begin again.</p>
-      <ButtonLink href="/" class="mt-8">Return home</ButtonLink>
-    </div>
+  <section class="page-head shell">
+    <h1 class="display">Nothing is playing here.</h1>
+    <p>This page doesn't exist. <a href="/">Return home</a></p>
   </section>
 </Layout>

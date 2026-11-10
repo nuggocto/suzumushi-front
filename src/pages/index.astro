@@ -1,12 +1,14 @@
 ---
 import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
-import ButtonLink from "../components/ButtonLink.astro";
-import CopyButton from "../components/CopyButton.astro";
+import CommandBlock from "../components/CommandBlock.astro";
+import Kanji from "../components/Kanji.astro";
 import LivePlayer from "../components/LivePlayer.astro";
 import RailSample from "../components/RailSample.astro";
 import suzu from "../assets/suzu.png";
 import { SITE } from "../data/site";
+
+const installerCommand = `curl -fsS https://${SITE.domain}/install.sh | sh`;
 
 const features = [
   {
@@ -51,26 +53,47 @@ const steps = [
 
 <Layout>
   <section class="hero shell" aria-labelledby="hero-title">
-    <h1 id="hero-title" class="display hero-title">Keep your music close.</h1>
     <div class="hero-copy">
+      <h1 id="hero-title" class="display">Keep your music close.</h1>
       <p class="hero-lede">
         Suzumushi is a terminal music player for Linux. Browse your local library, build a queue, and return to your saved playback position. No account required.
       </p>
-      <div class="hero-actions">
-        <ButtonLink href="/install">Install for Linux</ButtonLink>
-        <ButtonLink href={SITE.github} variant="secondary" external>View source ↗</ButtonLink>
+      <div class="hero-install">
+        <CommandBlock command={installerCommand} label="Install Suzumushi" />
+        <p class="small">
+          Version {SITE.version} for x86-64 GNU/Linux, installed to <code>~/.local/bin</code> without sudo.
+        </p>
       </div>
-      <p class="meta">Free and open source. Version {SITE.version} for <span class="nowrap">x86-64 GNU/Linux.</span></p>
+      <p class="links small">
+        <a href="/install">Other ways to install</a>
+        <a href={SITE.github} target="_blank" rel="noreferrer">View source</a>
+      </p>
     </div>
+
+    <figure class="hero-figure">
+      <div class="suzu">
+        <Image
+          src={suzu}
+          alt="Suzu, a bell cricket cut from charcoal and ivory Japanese paper, holding a small brass bell"
+          widths={[320, 480, 720, 960]}
+          sizes="(min-width: 900px) 30rem, 72vw"
+          loading="eager"
+          fetchpriority="high"
+          class="suzu-image"
+        />
+      </div>
+      <Kanji vertical class="hero-kanji" />
+      <figcaption class="small">Suzu, the bell cricket</figcaption>
+    </figure>
   </section>
 
-  <section id="player" class="shell player-section" aria-label="Try the player">
+  <section id="player" class="shell" aria-label="Try the player">
     <LivePlayer />
   </section>
 
   <section class="section shell" aria-labelledby="features-title">
     <h2 id="features-title" class="display section-heading">The essentials for everyday listening.</h2>
-    <p class="section-lede">
+    <p class="measure section-lede">
       Your library on the left, playback in the middle, and the queue on the right. Suzu dances in a night meadow that grows with the music.
     </p>
     <div class="features">
@@ -78,7 +101,7 @@ const steps = [
         features.map((feature) => (
           <article class="feature">
             <div>
-              <h3 class="feature-title">{feature.title}</h3>
+              <h3 class="title">{feature.title}</h3>
               <p class="feature-text">{feature.description}</p>
             </div>
             <div class="sample">
@@ -104,33 +127,31 @@ const steps = [
     </div>
   </section>
 
-  <section class="section shell first-listen" aria-labelledby="first-listen-title">
-    <div>
-      <h2 id="first-listen-title" class="display section-heading">Your first listen.</h2>
-      <p class="section-lede">
-        After installation, create a Suzumushi folder and add your audio to its library. Suzumushi reads that library; it doesn't automatically scan your Music folder.
-      </p>
-      <a class="text-link" href="/install#first-library">Read the setup instructions</a>
-    </div>
+  <section class="section shell" aria-labelledby="first-listen-title">
+    <h2 id="first-listen-title" class="display section-heading">Your first listen.</h2>
+    <p class="measure section-lede">
+      After installation, create a Suzumushi folder and add your audio to its library. Suzumushi reads that library; it doesn't automatically scan your Music folder.
+    </p>
     <ol class="steps">
       {
         steps.map((step, index) => (
           <li class="step">
-            <span class="step-number" aria-hidden="true">{index + 1}</span>
-            <div class="min-w-0">
-              <h3 class="step-title">{step.title}</h3>
+            <h3 class="title">
+              <span class="step-number mono" aria-hidden="true">
+                {index + 1}
+              </span>
+              {step.title}
+            </h3>
+            <div class="step-body">
               {"command" in step ? (
-                <div class="step-command" data-command>
-                  <code>{step.command}</code>
-                  <CopyButton />
-                </div>
+                <CommandBlock command={step.command} label={step.title} />
               ) : (
-                <p class="step-text">
+                <p>
                   Copy audio files or folders into <code>{step.path}</code>
                 </p>
               )}
               {index === 2 && (
-                <p class="step-text">
+                <p>
                   Select a track in Library and press <kbd>Enter</kbd> to add it and start listening.
                 </p>
               )}
@@ -139,81 +160,108 @@ const steps = [
         ))
       }
     </ol>
+    <p class="small"><a href="/install#first-library">Read the setup instructions</a></p>
   </section>
 
-  <section class="paper" aria-labelledby="install-title">
-    <div class="shell paper-inner">
-      <div class="paper-copy">
-        <h2 id="install-title" class="display">Ready to listen?</h2>
-        <p class="paper-text">
-          Install with one command on x86-64 GNU/Linux, from the AUR on Arch Linux, or with the flake on NixOS.
-        </p>
-        <div class="paper-actions">
-          <ButtonLink href="/install">Install for Linux</ButtonLink>
-          <ButtonLink href={SITE.github} variant="secondary" external>View source ↗</ButtonLink>
-        </div>
-        <p class="paper-meta">Plays MP3, FLAC, 16-bit PCM WAV, and Ogg Vorbis.</p>
-      </div>
-      <figure class="paper-figure">
-        <Image
-          src={suzu}
-          alt="Suzu, a bell cricket cut from charcoal and ivory Japanese paper, holding a small brass bell"
-          widths={[320, 480, 720, 960]}
-          sizes="(min-width: 1024px) 26rem, (min-width: 640px) 20rem, 70vw"
-          class="paper-suzu"
-        />
-        <figcaption>Suzu, the bell cricket</figcaption>
-      </figure>
-    </div>
+  <section class="section closing shell" aria-labelledby="install-title">
+    <h2 id="install-title" class="display">Ready to listen?</h2>
+    <p class="measure section-lede">Install with one command on x86-64 GNU/Linux, from the AUR on Arch Linux, or with the flake on NixOS.</p>
+    <CommandBlock command={installerCommand} label="Install Suzumushi" />
+    <p class="links small closing-links">
+      <a href="/install">Other ways to install</a>
+      <a href={SITE.github} target="_blank" rel="noreferrer">View source</a>
+    </p>
+    <p class="small">Plays MP3, FLAC, 16-bit PCM WAV, and Ogg Vorbis.</p>
   </section>
 </Layout>
 
 <style>
   .hero {
     display: grid;
-    gap: 1.5rem;
-    padding-block: 3rem 2rem;
+    gap: 2.5rem;
+    padding-block: 2rem 3.5rem;
   }
 
-  .hero-title {
-    max-width: 11ch;
-    margin: 0;
+  .hero > * {
+    min-width: 0;
   }
 
   .hero-lede {
-    max-width: 34rem;
+    max-width: 33rem;
+    margin: 1.75rem 0 0;
+  }
+
+  .hero-install {
+    margin-top: 2rem;
+  }
+
+  .hero-install p {
     margin: 0;
-    color: var(--muted);
   }
 
-  .meta {
-    margin: 1rem 0 0;
+  .hero-copy .links {
+    margin: 1.25rem 0 0;
+  }
+
+  .hero-figure {
+    position: relative;
+    justify-self: center;
+    width: min(72vw, 22rem);
+    margin: 0;
+  }
+
+  /* The one unprompted motion on the page: Suzu comes out of the dark. */
+  .suzu {
+    display: block;
+    width: 100%;
+    animation: emerge 2.4s ease-out both;
+  }
+
+  .suzu :global(.suzu-image) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @keyframes emerge {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .hero-figure :global(.hero-kanji) {
+    position: absolute;
+    top: 40%;
+    right: 0;
+    width: var(--size-lg);
+    color: var(--brass);
+    pointer-events: none;
+  }
+
+  .hero-figure figcaption {
+    margin-top: 0.75rem;
     color: var(--soft);
-    font-size: var(--size-sm);
-  }
-
-  .nowrap {
-    white-space: nowrap;
-  }
-
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
   }
 
   @media (min-width: 900px) {
     .hero {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 4rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
+      gap: 3rem;
       align-items: end;
-      padding-block: 4rem 2.5rem;
+      padding-block: 0.5rem 4.5rem;
+    }
+
+    .hero-copy {
+      padding-bottom: 3rem;
+    }
+
+    .hero-figure {
+      width: 100%;
     }
   }
 
-  .player-section {
-    padding-bottom: 2rem;
+  .section {
+    padding-top: 6rem;
   }
 
   .section-heading {
@@ -221,50 +269,35 @@ const steps = [
   }
 
   .section-lede {
-    max-width: 36rem;
-    margin: 1.25rem 0 1.5rem;
-    color: var(--muted);
+    margin: 1.75rem 0 0;
   }
 
   .features {
-    margin-top: 3rem;
-    border-top: 1px solid var(--line);
+    display: grid;
+    gap: 3.5rem;
+    margin-top: 4rem;
   }
 
   .feature {
     display: grid;
     gap: 1.25rem;
-    border-bottom: 1px solid var(--line);
-    padding-block: 2rem;
   }
 
-  @media (min-width: 900px) {
-    .feature {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-      gap: 4rem;
-      align-items: center;
-    }
-  }
-
-  .feature-title {
-    margin: 0;
-    font-weight: 600;
+  .feature > * {
+    min-width: 0;
   }
 
   .feature-text {
     max-width: 30rem;
     margin: 0.5rem 0 0;
-    color: var(--muted);
   }
 
   .sample {
     display: grid;
     overflow-x: auto;
-    margin: 0;
-    border-left: 2px solid var(--sage);
-    padding: 0.25rem 0 0.25rem 1.25rem;
     color: var(--ink);
     font: 400 var(--size-sm) / 1.7 var(--font-mono);
+    scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
   }
 
@@ -276,175 +309,80 @@ const steps = [
   .sample-key {
     display: inline-block;
     min-width: 8ch;
-    color: var(--sage);
-  }
-
-  .first-listen {
-    display: grid;
-    gap: 2.5rem;
-  }
-
-  @media (min-width: 900px) {
-    .first-listen {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-      gap: 4rem;
-    }
+    color: var(--brass);
   }
 
   .steps {
     display: grid;
-    gap: 2rem;
-    margin: 0;
+    gap: 2.5rem;
+    margin: 4rem 0 2.5rem;
     padding: 0;
     list-style: none;
   }
 
-  @media (min-width: 900px) {
-    .steps {
-      padding-top: 0.75rem;
-    }
-  }
-
   .step {
     display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .step > * {
+    min-width: 0;
   }
 
   .step-number {
+    display: inline-block;
+    width: 2rem;
     color: var(--brass);
-    font: 400 var(--size-sm) / 1.8 var(--font-mono);
   }
 
-  .step-title {
-    margin: 0;
-    font-weight: 600;
+  .step-body {
+    padding-left: 2rem;
   }
 
-  .step-command {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 0.6rem;
-    border: 1px solid var(--line);
-    background: var(--panel);
-    padding: 0.3rem 0.3rem 0.3rem 1rem;
-  }
-
-  .step-command code {
-    overflow-x: auto;
-    white-space: nowrap;
-    font: 400 var(--size-sm) / 1.6 var(--font-mono);
-  }
-
-  .step-text {
-    margin: 0.5rem 0 0;
-    color: var(--muted);
-  }
-
-  .step-text code {
-    overflow-wrap: anywhere;
-    color: var(--ink);
-    font: 400 var(--size-sm) var(--font-mono);
-  }
-
-  /* The closing band is the paper Suzu is cut from. */
-  .paper {
-    margin-top: 2rem;
-    background: var(--paper);
-    color: var(--charcoal);
-  }
-
-  .paper-inner {
-    display: grid;
-    gap: 1rem;
-    align-items: end;
-    padding-top: 4rem;
-  }
-
-  .paper-copy {
-    padding-bottom: 1rem;
-  }
-
-  .paper-text {
-    max-width: 30rem;
-    margin: 1.25rem 0 0;
-    color: #444b49;
-  }
-
-  .paper-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1.75rem;
-  }
-
-  .paper-actions :global(.button) {
-    border-color: var(--charcoal);
-    background: var(--charcoal);
-    color: var(--paper);
-  }
-
-  .paper-actions :global(.button:hover) {
-    border-color: #3a403e;
-    background: #3a403e;
-    color: var(--paper);
-  }
-
-  .paper-actions :global(.button-secondary) {
-    background: transparent;
-    color: var(--charcoal);
-  }
-
-  .paper-actions :global(.button-secondary:hover) {
-    border-color: var(--charcoal);
-    background: #d8d1bf;
-    color: var(--charcoal);
-  }
-
-  .paper-actions :global(.button:focus-visible) {
-    outline-color: var(--charcoal);
-  }
-
-  .paper-meta {
-    margin: 1.25rem 0 0;
-    color: #555c5a;
-    font-size: var(--size-sm);
-  }
-
-  .paper-figure {
-    justify-self: center;
-    width: min(70vw, 20rem);
+  .step-body p {
     margin: 0;
   }
 
-  .paper-suzu {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  .paper-figure figcaption {
-    padding-block: 0.5rem 1.5rem;
-    color: #555c5a;
-    font-size: var(--size-sm);
-    text-align: center;
+  .step-body p + p,
+  .step-body :global(.command) + p {
+    margin-top: 0.5rem;
   }
 
   @media (min-width: 900px) {
-    .paper-inner {
-      grid-template-columns: minmax(0, 1fr) 26rem;
+    .feature,
+    .step {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
       gap: 4rem;
-      padding-top: 5rem;
+      align-items: start;
     }
 
-    .paper-copy {
-      padding-bottom: 5rem;
+    .step-body {
+      padding-left: 0;
     }
 
-    .paper-figure {
-      width: 26rem;
-      margin-top: -8rem;
+    /* A command's first line sits on the same baseline as its step title. */
+    .step-body :global(.command-text),
+    .step-body :global(.command-copy) {
+      margin-top: -0.45rem;
+    }
+  }
+
+  .closing :global(.command) {
+    margin-top: 2rem;
+  }
+
+  .closing-links {
+    margin: 1.25rem 0 1.5rem;
+  }
+
+  .closing > p:last-child {
+    margin: 0;
+    color: var(--soft);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .suzu {
+      animation: none;
     }
   }
 </style>

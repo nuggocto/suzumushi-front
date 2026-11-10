@@ -1,6 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import ButtonLink from "../components/ButtonLink.astro";
 import { SITE } from "../data/site";
 
 const releases = [
@@ -256,41 +255,68 @@ const releases = [
 ---
 
 <Layout title="Changelog" description={`The Suzumushi release history, through version ${SITE.version}.`}>
-  <section class="section shell">
-    <p class="eyebrow">Release notes</p>
-    <h1 class="page-title mt-4">Changelog.</h1>
-    <p class="mt-5 max-w-2xl leading-relaxed text-muted">What changed in each Suzumushi release.</p>
+  <section class="page-head shell">
+    <h1 class="display">Changelog.</h1>
+    <p>What changed in each Suzumushi release.</p>
   </section>
 
-  <section class="shell pb-24">
-    <div class="relative mt-8">
-      <div class="absolute top-0 bottom-0 left-[0.34rem] w-px bg-line sm:left-[8.45rem]"></div>
-      <div class="grid gap-12">
-        {releases.map((release, index) => (
-          <article class="relative grid gap-4 pl-8 sm:grid-cols-[7.2rem_1fr] sm:gap-10 sm:pl-0">
-            <div class="sm:text-right">
-              <div class:list={["absolute top-2 left-0 size-3 border-2 border-night sm:left-[8.1rem]", index === 0 ? "bg-accent" : "bg-soft"]}></div>
-              <p class="font-mono text-sm text-ink">v{release.version}</p>
-              <p class="mt-1 font-mono text-sm leading-relaxed text-soft">{release.date}</p>
-            </div>
-            <div class="panel p-6 sm:p-8">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="section-title text-ink">{release.label}</h2>
-                {index === 0 && <span class="border border-line px-3 py-1 text-sm font-medium text-muted">current</span>}
-              </div>
-              <p class="mt-3 text-muted">{release.summary}</p>
-              <ul class="mt-6 grid gap-3 leading-relaxed text-muted">
-                {release.changes.map((change) => <li class="flex gap-3"><span class="mt-[0.65rem] size-1 shrink-0 bg-accent"></span><span class="min-w-0 [overflow-wrap:anywhere]">{change}</span></li>)}
-              </ul>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
+  <div class="shell">
+    {
+      releases.map((release, index) => (
+        <article class="entry">
+          <p class="mono release-meta">
+            <span class="ink">v{release.version}</span>
+            {index === 0 && <span class="brass">current</span>}
+            <span class="release-date">{release.date}</span>
+          </p>
+          <div class="stack">
+            <h2 class="title">{release.label}</h2>
+            <p class="ink">{release.summary}</p>
+            <ul>
+              {release.changes.map((change) => <li>{change}</li>)}
+            </ul>
+          </div>
+        </article>
+      ))
+    }
 
-    <div class="mt-16 flex flex-wrap items-center justify-center gap-3">
-      <ButtonLink href={SITE.release} external>Read the v{SITE.version} release ↗</ButtonLink>
-      <ButtonLink href={`${SITE.github}/blob/shrek/CHANGELOG.md`} variant="secondary" external>Complete changelog ↗</ButtonLink>
-    </div>
-  </section>
+    <p class="links small release-links">
+      <a href={SITE.release} target="_blank" rel="noreferrer">Read the v{SITE.version} release</a>
+      <a href={`${SITE.github}/blob/shrek/CHANGELOG.md`} target="_blank" rel="noreferrer">Complete changelog</a>
+    </p>
+  </div>
 </Layout>
+
+<style>
+  .release-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: 0 1rem;
+    margin: 0;
+    color: var(--soft);
+  }
+
+  .release-date {
+    flex-basis: 100%;
+  }
+
+  li {
+    overflow-wrap: anywhere;
+  }
+
+  .release-links {
+    margin: 2rem 0 0;
+  }
+
+  @media (min-width: 900px) {
+    /* The version shares a baseline with the release title beside it. */
+    .release-meta {
+      padding-top: 0.2rem;
+    }
+
+    .release-links {
+      margin-left: 19rem;
+    }
+  }
+</style>

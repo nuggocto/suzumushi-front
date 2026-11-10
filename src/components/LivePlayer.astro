@@ -958,21 +958,18 @@ const keys = [
     flex-direction: column;
     height: 42rem;
     border: 1px solid var(--line);
-    background: #0b0f10;
     padding: 1rem 0.75rem 0.5rem;
     color: #dcdad0;
     font: 400 var(--size-sm) / 1.5 var(--font-mono);
     cursor: default;
-    transition:
-      border-color 150ms ease,
-      box-shadow 150ms ease;
+    transition: border-color 150ms ease;
   }
 
+  /* Like the player, the demo paints no background: the page's night shows through. */
   .term:focus-visible,
   .term:focus-within {
     outline: none;
-    border-color: var(--cyan);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 22%, transparent);
+    border-color: var(--brass);
   }
 
   .screen {
@@ -1008,7 +1005,7 @@ const keys = [
     top: -0.75em;
     left: 0.9ch;
     margin: 0;
-    background: #0b0f10;
+    background: var(--night);
     padding-inline: 1ch;
     white-space: pre;
   }
@@ -1033,7 +1030,7 @@ const keys = [
 
   .rows :global(.row.is-selected) {
     background: var(--cyan);
-    color: #0b0f10;
+    color: var(--night);
     font-weight: 600;
   }
 
@@ -1213,15 +1210,11 @@ const keys = [
     min-width: 2.75rem;
     min-height: 2.75rem;
     border: 1px solid var(--line);
-    border-bottom-width: 3px;
-    background: var(--panel);
     padding: 0 0.7rem;
     color: var(--ink);
     font: 400 var(--size-sm) / 1 var(--font-mono);
     cursor: pointer;
-    transition:
-      border-color 120ms ease,
-      transform 80ms ease;
+    transition: border-color 120ms ease;
   }
 
   .key:hover {
@@ -1229,20 +1222,14 @@ const keys = [
   }
 
   .key:active {
-    transform: translateY(2px);
-    border-bottom-width: 1px;
-    margin-bottom: 2px;
+    border-color: var(--brass);
+    color: var(--brass);
   }
 
   .hint {
-    max-width: 38rem;
+    max-width: 36rem;
     margin: 0;
-    color: var(--muted);
     font-size: var(--size-sm);
-  }
-
-  .hint .text-link {
-    white-space: nowrap;
   }
 
   .sr-only {
