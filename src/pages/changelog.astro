@@ -5,6 +5,22 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.3.0",
+    date: "10 November 2026",
+    label: "Any terminal size",
+    summary: "Follows any terminal size, sleeps while idle, and trims config.toml to five options.",
+    changes: [
+      "Keeps playing when the terminal grows past about 105,000 cells, such as 500x250 on a zoomed-out 5K display. 1.2.2 ended the session there.",
+      "Stops panicking when suzumushi diagnose or --help writes into a closed pipe, as in suzumushi diagnose | head.",
+      "Timestamps every log line, lines up the key guide, and shows a running track count during a long first scan.",
+      "Trims config.toml to theme, default_view, and three scan options. Older files keep loading.",
+      "Wakes desktop controls only when the player changes, and checks the audio worker every 100 ms while paused instead of every 5 ms.",
+      "Removes now-playing.json, which nothing read, and lets a second player on another root take its own MPRIS name.",
+      "Builds with Rust 1.99.1 and fat LTO, for a binary 25% smaller.",
+      "Updates the Linux archive, AUR package, and stable Nix installation to 1.3.0.",
+    ],
+  },
+  {
     version: "1.2.2",
     date: "27 October 2026",
     label: "One-line install",
