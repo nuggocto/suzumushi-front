@@ -20,7 +20,8 @@ const PASTEL: ReadonlyArray<readonly [number, Rgb]> = [
 const FIREFLY: Rgb = [0xff, 0xf1, 0xa8];
 const MOON: Rgb = [0xff, 0xf3, 0xd6];
 const STAR: Rgb = [0xd9, 0xd6, 0xf2];
-const TRACK: Rgb = [0x5a, 0x60, 0x66];
+// The unplayed dew on the progress rail, drawn dim.
+const TRACK: Rgb = [0xb8, 0xbe, 0xc6];
 const HOT_CORE: Rgb = [255, 255, 240];
 const WHITE: Rgb = [255, 255, 245];
 
@@ -31,10 +32,10 @@ const GRAVITY = 6.5;
 const KICK = 0.2;
 const MAX_KICK = 2;
 const MAX_BALL = 1.06;
-const LIFT_SECONDS = 1.6;
+const LIFT_SECONDS = 1.2;
 const COLOR_TURN_SECONDS = 0.9;
-const RETURN_SECONDS = 1.1;
-const RETURN_STAGGER = 0.02;
+const RETURN_SECONDS = LIFT_SECONDS;
+const RETURN_STAGGER = 0.012;
 const RETURN_ARC = 0.05;
 const MIN_STEM_DOTS = 2;
 const TOP_MARGIN_DOTS = 3;
@@ -80,15 +81,11 @@ function clamp(value: number, low: number, high: number) {
   return Math.min(Math.max(value, low), high);
 }
 
+// Starts and ends at rest, with the lowest top speed of the usual eases.
 const smoothstep = (v: number) => {
   const x = clamp(v, 0, 1);
   return x * x * (3 - 2 * x);
 };
-const smootherstep = (v: number) => {
-  const x = clamp(v, 0, 1);
-  return x * x * x * (x * (x * 6 - 15) + 10);
-};
-const easeOutCubic = (v: number) => 1 - (1 - clamp(v, 0, 1)) ** 3;
 
 /** A deterministic 0..1 sequence per seed, like the player's splitmix. */
 function sequence(seed: number) {
@@ -269,7 +266,7 @@ export class Meadow {
       firefly.homeY +
       firefly.wander[1] * Math.sin(tau * firefly.speed[1] * elapsed + firefly.phase[1]);
     const home = { x: clamp(homeX, 0.02, 0.98), y: clamp(homeY, 0.08, 0.95) };
-    const lift = easeOutCubic(elapsed / LIFT_SECONDS);
+    const lift = smoothstep(elapsed / LIFT_SECONDS);
     const wave = 0.5 + 0.5 * Math.sin(tau * firefly.blink * elapsed + firefly.phase[3]);
     return {
       point: { x: from.x + (home.x - from.x) * lift, y: from.y + (home.y - from.y) * lift },
@@ -282,7 +279,7 @@ export class Meadow {
     const flight = this.flight;
     if (flight.kind === "attached") return 1;
     if (flight.kind === "drifting") return 0;
-    return smootherstep((seconds - flight.since - RETURN_STAGGER * band) / RETURN_SECONDS);
+    return smoothstep((seconds - flight.since - RETURN_STAGGER * band) / RETURN_SECONDS);
   }
 
   private attachedPoint(band: number, field: Field): Point {
