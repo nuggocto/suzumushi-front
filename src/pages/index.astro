@@ -47,7 +47,7 @@ const features = [
 const steps = [
   { title: "Create your library", command: "suzumushi init ./suzumushi" },
   { title: "Add your audio", path: "./suzumushi/audio/library/" },
-  { title: "Open the player", command: "suzumushi --root ./suzumushi" },
+  { title: "Open the player", command: "suzu" },
 ] as const;
 ---
 
@@ -151,7 +151,7 @@ const steps = [
               )}
               {index === 2 && (
                 <p>
-                  Select a track in Library and press <kbd>Enter</kbd> to add it and start listening.
+                  Run <code>suzu</code> or <code>suzumushi</code> from the folder containing <code>./suzumushi/</code>. Select a track in Library and press <kbd>Enter</kbd> to add it and start listening.
                 </p>
               )}
             </div>
