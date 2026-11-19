@@ -721,7 +721,19 @@ const keys = [
           return `<div class="row${active ? " is-selected" : ""}">${escapeHtml(text)}</div>`;
         })
         .join("");
-      container.querySelector(".is-selected")?.scrollIntoView({ block: "nearest" });
+      keepSelectedVisible(container);
+    }
+
+    // Scrolls the pane, never the page. scrollIntoView would also scroll the
+    // window, and render runs on timers and resizes, so a reader scrolling
+    // past the demo would be pulled back to it.
+    function keepSelectedVisible(container: HTMLElement) {
+      const row = container.querySelector<HTMLElement>(".is-selected");
+      if (!row) return;
+      const pane = container.getBoundingClientRect();
+      const selected = row.getBoundingClientRect();
+      if (selected.top < pane.top) container.scrollTop -= pane.top - selected.top;
+      else if (selected.bottom > pane.bottom) container.scrollTop += selected.bottom - pane.bottom;
     }
 
     function playProgress(): number | null {
