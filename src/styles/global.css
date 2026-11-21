@@ -1,18 +1,14 @@
-@import "tailwindcss";
-
 /*
   The page works the way the player does: it never paints a background.
   Everything sits on one black night, in two typefaces and three sizes.
   Shippori Mincho speaks; IBM Plex Mono is whatever you type or the player shows.
 */
 
-@theme {
-  --font-serif: "Shippori Mincho", "Iowan Old Style", Georgia, serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-}
-
 :root {
   color-scheme: dark;
+
+  --font-serif: "Shippori Mincho", "Iowan Old Style", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   --night: #000;
   --ink: #ece5d3;
@@ -36,7 +32,9 @@
   ::before,
   ::after {
     box-sizing: border-box;
-    border-color: var(--line);
+    margin: 0;
+    padding: 0;
+    border: 0 solid var(--line);
   }
 
   html {
@@ -71,7 +69,27 @@
   h2,
   h3 {
     color: var(--ink);
+    font-size: inherit;
+    font-weight: inherit;
     text-wrap: balance;
+  }
+
+  ol,
+  ul {
+    list-style: none;
+  }
+
+  img,
+  svg,
+  canvas {
+    display: block;
+    vertical-align: middle;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: transparent;
   }
 
   p,

@@ -4,6 +4,21 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.4.1",
+    date: "21 November 2026",
+    label: "Resilience and a smaller binary",
+    summary:
+      "Keeps playback running across terminal resizes, drops leftover async dependencies, and shrinks the release binary by 23%.",
+    changes: [
+      "Retries interrupted polls in the decoder output reader so resizing the terminal during playback no longer stops the track.",
+      "Retries interrupted polls when querying the terminal's background color at startup instead of blocking past the 300 ms deadline.",
+      "Removes the leftover async-io and futures-lite dependencies (and their extra reactor thread) in favor of zruntime from zbus 6.",
+      "Builds releases with opt-level = \"s\", reducing the stripped Linux binary from 4.3 MiB to 3.3 MiB.",
+      "Binds the metadata helper's lifetime to its parent with PR_SET_PDEATHSIG and sizes metadata cache write buffers from entry count.",
+      "Updates the Linux archive, AUR package, and stable Nix installation to 1.4.1.",
+    ],
+  },
+  {
     version: "1.4.0",
     date: "12 November 2026",
     label: "Light terminals",
