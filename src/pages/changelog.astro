@@ -4,6 +4,21 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.4.3",
+    date: "22 November 2026",
+    label: "Closing the terminal window",
+    summary:
+      "Closing the terminal window ends the player at once again, instead of leaving it running at full CPU with its library locked.",
+    changes: [
+      "Lets SIGHUP end the player immediately, as before 1.4.2. In 1.4.2 a closed window could leave the player spinning on one core with its root lock held, so the next launch failed with \"root writer lease is already held\".",
+      "Resumes from the last saved Queue, track, and position after a window close. During playback, a moving position is saved about every five seconds.",
+      "Discards drawing and restore output once a write reports that the terminal is gone. This can happen when the player and terminal emulator both shut down.",
+      "Saves the final checkpoint before desktop controls shut down, so a slow session bus cannot keep it from being written.",
+      "Raises the metadata cache limit to 50,000 files, subject to its tag text and JSON size limits. Records for deleted files no longer crowd out new ones, and the cache file is replaced only when its contents change.",
+      "Rebuilds the desktop-controls state when the player changes, including when shuffle rebuilds the play order.",
+    ],
+  },
+  {
     version: "1.4.2",
     date: "22 November 2026",
     label: "Clean exits, safe sessions, and accurate MP3 seeking",
