@@ -35,10 +35,11 @@ const { command, label = "Command" } = Astro.props;
 
 <style>
   .command {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
     gap: 0 1rem;
+    width: 100%;
     min-width: 0;
     max-width: 100%;
   }
@@ -63,12 +64,11 @@ const { command, label = "Command" } = Astro.props;
   }
 
   .command-copy {
-    flex: none;
     min-width: 3.75rem;
     min-height: 2.75rem;
     color: var(--soft);
     font: 400 var(--size-sm) / 1 var(--font-mono);
-    text-align: left;
+    text-align: right;
     cursor: pointer;
   }
 
