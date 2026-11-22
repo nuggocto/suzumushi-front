@@ -16,7 +16,8 @@ if (
 ) {
   throw new Error(`install.sh does not install the ${SITE.version} archive`);
 }
-if (!script.toString("utf8").trimEnd().endsWith('main "$@"')) {
+const trimmed = script.toString("utf8").trimEnd();
+if (!trimmed.endsWith('main "$@"') && !trimmed.endsWith('{ main "$@"; }')) {
   throw new Error("install.sh must call main only on its last line");
 }
 console.log(`install.sh matches release ${SITE.version}.`);

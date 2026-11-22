@@ -17,16 +17,16 @@ const nixCommand = `nix --extra-experimental-features 'nix-command flakes' \\
 <Layout title="Install" description="Install Suzumushi on Linux and set up your first local audio library.">
   <section class="page-head shell">
     <h1 class="display">Install Suzumushi.</h1>
-    <p>Run the installer on any x86-64 GNU/Linux system, or choose the AUR package for Arch Linux or the flake for NixOS. Then create your library below. The current release is version {SITE.version}.</p>
+    <p>Install the prebuilt binary on x86-64 GNU/Linux (glibc 2.35+), or choose the AUR package for Arch Linux, the Nix flake, or build from source. Then create your library below. The current release is version {SITE.version}.</p>
   </section>
 
   <div class="shell">
     <section class="entry" aria-labelledby="installer-title">
-      <h2 id="installer-title" class="title">Any x86-64 Linux</h2>
+      <h2 id="installer-title" class="title">x86-64 GNU/Linux</h2>
       <div class="stack">
         <p>Paste this into your terminal. It installs <code>suzumushi</code> and the <code>suzu</code> shortcut in <code>~/.local/bin</code> without sudo.</p>
         <CommandBlock command={installerCommand} label="Install" />
-        <p class="small">The script installs the v{SITE.version} archive only after it matches the SHA-256 recorded in the script, and only if the player starts. If the download stops partway, nothing runs. The player needs the ALSA, PipeWire, and D-Bus libraries that most desktops already include. This site serves an exact copy of the release's <a href={`${RELEASE.baseUrl}/install.sh`}>install.sh</a>, SHA-256 <code>{RELEASE.installerChecksum}</code>.</p>
+        <p class="small">The script installs the v{SITE.version} archive only after it matches the SHA-256 recorded in the script, and only if the player starts. If the download stops partway, nothing runs. Prebuilt releases are built on Ubuntu 24.04 and need glibc 2.35 or newer plus the ALSA, PipeWire, and D-Bus runtime libraries. On older glibc or non-glibc systems, use <a href="#nixos">Nix</a> or <a href="#source-title">build from source</a>. This site serves an exact copy of the release's <a href={`${RELEASE.baseUrl}/install.sh`}>install.sh</a>, SHA-256 <code>{RELEASE.installerChecksum}</code>.</p>
       </div>
     </section>
 
@@ -93,8 +93,8 @@ const nixCommand = `nix --extra-experimental-features 'nix-command flakes' \\
       <li class="entry">
         <h3 class="title"><span class="mono brass step-number" aria-hidden="true">3</span>Open the player</h3>
         <div class="stack">
-          <CommandBlock command="suzu" label="Start listening" />
-          <p>Run <code>suzu</code> or <code>suzumushi</code> from the folder containing <code>./suzumushi/</code>. The player finds your library automatically.</p>
+          <CommandBlock command="suzumushi" label="Start listening" />
+          <p>Run <code>suzumushi</code> (or <code>suzu</code> from a packaged install) from the folder containing <code>./suzumushi/</code>. The player finds your library automatically.</p>
           <p>Select a track in Library and press <kbd>Enter</kbd> to add it and start playback. Use <kbd>Space</kbd> to pause and <kbd>?</kbd> for the key guide.</p>
         </div>
       </li>

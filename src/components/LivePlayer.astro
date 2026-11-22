@@ -59,7 +59,7 @@ const keys = [
         <dd><span>Up or Down, j or k</span><span>move the selection</span></dd>
         <dd><span>Home or End, g or G</span><span>jump to the first or last item</span></dd>
         <dt>Library and search</dt>
-        <dd><span>/</span><span>search artist, title, filename, and path</span></dd>
+        <dd><span>/</span><span>search track titles and folders</span></dd>
         <dd><span>Enter</span><span>toggle folders; add tracks or playlists</span></dd>
         <dd><span>Esc</span><span>close search</span></dd>
         <dt>Queue</dt>
@@ -71,7 +71,7 @@ const keys = [
         <dd><span>Left or Right</span><span>seek back or forward five seconds</span></dd>
         <dd><span>- or +</span><span>volume down or up&nbsp;&nbsp;&nbsp; m mute</span></dd>
         <dd><span>x</span><span>shuffle&nbsp;&nbsp;&nbsp; r repeat</span></dd>
-        <dd><span>? or Esc</span><span>close help&nbsp;&nbsp;&nbsp; q quit&nbsp;&nbsp;&nbsp; Ctrl+c quit anywhere</span></dd>
+        <dd><span>? or Esc</span><span>close help&nbsp;&nbsp;&nbsp; q quit</span></dd>
       </dl>
     </div>
 
@@ -324,6 +324,8 @@ const keys = [
       volume: 50,
       muted: false,
       shuffle: false,
+      shuffleOrder: [] as string[],
+      shuffleCursor: -1,
       repeat: "off" as "off" | "queue" | "one",
       help: false,
       closed: false,
@@ -332,6 +334,12 @@ const keys = [
       noticeTimer: 0,
     };
     const meadow = new Meadow();
+    const FOLDER_NAMES = new Map(
+      TREE.filter((row): row is Extract<Row, { kind: "folder" }> => row.kind === "folder").map((row) => [
+        row.id,
+        row.name.toLowerCase(),
+      ]),
+    );
 
     const escapeHtml = (text: string) =>
       text.replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char]!);
@@ -341,7 +349,12 @@ const keys = [
       if (state.search) {
         const query = state.search.query.toLowerCase();
         if (!query) return TREE;
-        return TREE.filter((row) => row.kind === "track" && TRACKS[row.track].title.toLowerCase().includes(query));
+        return TREE.filter(
+          (row) =>
+            row.kind === "track" &&
+            (TRACKS[row.track].title.toLowerCase().includes(query) ||
+              row.parents.some((id) => FOLDER_NAMES.get(id)?.includes(query))),
+        );
       }
       return TREE.filter((row) => !("parents" in row) || !row.parents.some((id) => state.collapsed.has(id)));
     }
@@ -386,6 +399,46 @@ const keys = [
       }
     }
 
+    function shuffleInPlace(items: string[], start = 0) {
+      for (let right = items.length - 1; right > start; right -= 1) {
+        const left = start + Math.floor(Math.random() * (right - start + 1));
+        [items[left], items[right]] = [items[right], items[left]];
+      }
+    }
+
+    function refreshShuffleOrder() {
+      state.shuffleOrder = [];
+      state.shuffleCursor = -1;
+      if (!state.shuffle) return;
+      state.shuffleOrder = [...state.queue];
+      shuffleInPlace(state.shuffleOrder);
+      if (state.current && state.status !== "Stopped") {
+        const position = state.shuffleOrder.indexOf(state.current);
+        if (position >= 0) {
+          [state.shuffleOrder[0], state.shuffleOrder[position]] = [
+            state.shuffleOrder[position],
+            state.shuffleOrder[0],
+          ];
+          state.shuffleCursor = 0;
+        }
+      }
+    }
+
+    function extendShuffleOrder(added: string[]) {
+      if (!state.shuffle) return;
+      const suffixStart = Math.min(state.shuffleCursor + 1, state.shuffleOrder.length);
+      state.shuffleOrder.push(...added);
+      shuffleInPlace(state.shuffleOrder, suffixStart);
+    }
+
+    function removeFromShuffleOrder(id: string) {
+      if (!state.shuffle) return;
+      const position = state.shuffleOrder.indexOf(id);
+      if (position < 0) return;
+      state.shuffleOrder.splice(position, 1);
+      if (position <= state.shuffleCursor) state.shuffleCursor -= 1;
+    }
+
     function append(ids: string[]): boolean {
       if (ids.some((id) => state.queue.includes(id))) {
         notify("Audio already in Queue");
@@ -393,9 +446,11 @@ const keys = [
       }
       const start = state.queue.length;
       state.queue.push(...ids);
+      extendShuffleOrder(ids);
       if (!state.current) {
         state.queueSelection = start;
         startTrack(state.queue[start], true);
+        refreshShuffleOrder();
       }
       return true;
     }
@@ -405,6 +460,7 @@ const keys = [
       state.position = 0;
       state.status = play ? "Playing" : "Paused";
       state.queueSelection = state.queue.indexOf(id);
+      if (state.shuffle) state.shuffleCursor = state.shuffleOrder.indexOf(id);
     }
 
     function stop(message = "Stopped") {
@@ -424,6 +480,7 @@ const keys = [
           return;
         }
         startTrack(state.queue[state.queueSelection] ?? state.queue[0], true);
+        refreshShuffleOrder();
         notify("Playing");
         return;
       }
@@ -431,16 +488,28 @@ const keys = [
         state.status = "Paused";
         notify("Paused");
       } else {
+        const wasStopped = state.status === "Stopped";
         state.status = "Playing";
+        if (wasStopped) refreshShuffleOrder();
         notify("Playing");
       }
     }
 
     function neighbour(step: 1 | -1): string | null {
-      if (!state.current) return null;
-      if (state.shuffle && step === 1 && state.queue.length > 1) {
-        const others = state.queue.filter((id) => id !== state.current);
-        return others[Math.floor(Math.random() * others.length)];
+      if (!state.current || !state.queue.length) return null;
+      if (state.shuffle) {
+        const found = state.shuffleOrder.indexOf(state.current);
+        if (step === 1) {
+          const position = found >= 0 ? found : state.shuffleCursor;
+          const next = position + 1;
+          if (next < state.shuffleOrder.length) return state.shuffleOrder[next];
+          if (state.repeat === "queue" && state.shuffleOrder.length) return state.shuffleOrder[0];
+          return null;
+        }
+        const prev = found >= 0 ? found - 1 : state.shuffleCursor;
+        if (prev >= 0 && prev < state.shuffleOrder.length) return state.shuffleOrder[prev];
+        if (state.repeat === "queue" && state.shuffleOrder.length) return state.shuffleOrder.at(-1)!;
+        return null;
       }
       const index = state.queue.indexOf(state.current) + step;
       if (index >= 0 && index < state.queue.length) return state.queue[index];
@@ -658,6 +727,7 @@ const keys = [
           break;
         case "x":
           state.shuffle = !state.shuffle;
+          refreshShuffleOrder();
           notify(state.shuffle ? "Shuffle: on" : "Shuffle: off");
           break;
         case "r":
@@ -681,6 +751,7 @@ const keys = [
           if (state.focus !== "queue" || !state.queue.length) return true;
           {
             const [removed] = state.queue.splice(state.queueSelection, 1);
+            removeFromShuffleOrder(removed);
             if (removed === state.current && state.status === "Stopped") {
               state.current = null;
               state.position = 0;
@@ -692,6 +763,8 @@ const keys = [
         case "c":
           if (state.focus !== "queue") return true;
           state.queue = [];
+          state.shuffleOrder = [];
+          state.shuffleCursor = -1;
           state.queueSelection = 0;
           if (state.status === "Stopped") {
             state.current = null;
@@ -763,6 +836,8 @@ const keys = [
     // player's state changes, so every transition lands at once and holds still.
     let sceneSeconds = 0;
     let sceneStatus: PlayerStatus = state.status;
+    let lastSuzuKey = "";
+    let lastSuzuSpans: [number, number][] = [];
 
     function drawScene() {
       if (state.help || state.closed) return;
@@ -799,11 +874,17 @@ const keys = [
       const titleStart = Math.floor(columns / 2) - Math.floor(titleLength / 2);
 
       const playing = state.status === "Playing";
-      const pose = playing && !reducedMotion.matches ? DANCE[Math.floor((sceneSeconds * 1000) / 200) % 4] : RESTING;
-      const suzu = drawFrame(pose, columns);
-      els.suzu.setAttribute("viewBox", `0 0 ${columns * CW} ${8 * CH}`);
-      Object.assign(els.suzu.style, { width: `${width}px`, height: `${8 * cell.height}px` });
-      els.suzu.innerHTML = suzu.svg;
+      const poseIndex = playing && !reducedMotion.matches ? Math.floor((sceneSeconds * 1000) / 200) % 4 : -1;
+      const suzuKey = `${poseIndex}:${columns}:${width}:${cell.height}`;
+      if (suzuKey !== lastSuzuKey) {
+        const pose = poseIndex >= 0 ? DANCE[poseIndex] : RESTING;
+        const suzu = drawFrame(pose, columns);
+        els.suzu.setAttribute("viewBox", `0 0 ${columns * CW} ${8 * CH}`);
+        Object.assign(els.suzu.style, { width: `${width}px`, height: `${8 * cell.height}px` });
+        els.suzu.innerHTML = suzu.svg;
+        lastSuzuKey = suzuKey;
+        lastSuzuSpans = suzu.spans;
+      }
       const suzuTop = rows - 8;
 
       const ctx = els.meadow.getContext("2d");
@@ -821,7 +902,7 @@ const keys = [
           // Suzu and the title keep a clear silhouette in front of the meadow.
           mask: (column, row) => {
             if (row === titleRow) return column >= titleStart - 1 && column <= titleStart + titleLength;
-            const span = suzu.spans[row - suzuTop];
+            const span = lastSuzuSpans[row - suzuTop];
             return span !== undefined && column >= span[0] && column <= span[1];
           },
         },
@@ -864,7 +945,7 @@ const keys = [
         rows.map(rowText),
         librarySelection(),
         state.focus === "library",
-        state.search ? "No matches\nTry artist, title, filename, or path." : "",
+        state.search ? "No matches\nTry a track title or folder." : "",
       );
       renderRows(
         els.queue,
@@ -890,7 +971,7 @@ const keys = [
       const notice = state.notice ? `<span class="notice">${escapeHtml(state.notice)}</span>` : "";
       if (state.search) {
         els.statusKeys.innerHTML = ` Search: ${escapeHtml(state.search.query)}<span class="cursor"></span>`;
-        els.statusPlayback.innerHTML = ` Enter add · Esc close · Ctrl+c quit  ${notice}`;
+        els.statusPlayback.innerHTML = ` Enter add · Esc close  ${notice}`;
       } else {
         const keys = {
           library: " Tab focus · / search · ↑/↓ move · Enter open/add  ",
@@ -946,15 +1027,16 @@ const keys = [
     let lastFrame = 0;
     const frameLoop = (now: number) => {
       window.requestAnimationFrame(frameLoop);
-      if (!visible || document.hidden) return;
+      if (!visible || document.hidden || reducedMotion.matches) return;
       const interval = meadow.moving(state.status) ? 33 : 100;
       if (now - lastFrame < interval) return;
-      if (!reducedMotion.matches) sceneSeconds += Math.min((now - lastFrame) / 1000, 0.1);
+      sceneSeconds += Math.min((now - lastFrame) / 1000, 0.1);
       lastFrame = now;
       drawScene();
     };
     window.requestAnimationFrame(frameLoop);
 
+    reducedMotion.addEventListener("change", render);
     window.addEventListener("resize", render, { passive: true });
     render();
   }

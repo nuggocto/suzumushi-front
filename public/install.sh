@@ -4,8 +4,8 @@
 # Safe to pipe into sh: main runs only after the shell has read the last line.
 set -eu
 umask 077
-version='1.4.1'
-expected='31953d73269c1778a178096849056213f4056cb5a27df0de6a049fb4ea740e5d'
+version='1.4.2'
+expected='827dbc10b0a897c680c79d3cbf9b7d8f9e4e364f2a01a737adc0701f25d69077'
 base_url="https://github.com/nuggocto/suzumushi/releases/download/v$version"
 work=''
 staging=''
@@ -85,4 +85,4 @@ main() {
     esac
 }
 
-main "$@"
+{ main "$@"; }

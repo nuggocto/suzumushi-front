@@ -4,6 +4,21 @@ import { SITE } from "../data/site";
 
 const releases = [
   {
+    version: "1.4.2",
+    date: "22 November 2026",
+    label: "Clean exits, safe sessions, and accurate MP3 seeking",
+    summary:
+      "Restores the terminal on SIGTERM/SIGHUP/SIGINT, preserves saved sessions on inconclusive startups, and fixes MP3 seeking with large ID3v2 tags.",
+    changes: [
+      "Handles SIGTERM, SIGHUP, and SIGINT with an orderly shutdown that restores terminal modes and saves the resume checkpoint, falling back to default termination during teardown.",
+      "Leaves state/session.json untouched across failed launches, unsupported schema versions, missing tracks, and partial restores until you edit the Queue.",
+      "Subtracts leading ID3v2 tag bytes before CBR MP3 duration estimation and seeking so large embedded cover art no longer skews track lengths or seek offsets.",
+      "Clamps helper process CPU and address-space limits against stricter inherited soft and hard limits instead of failing with EPERM.",
+      "Hardens install.sh against partial-download truncation on its final line, tracks shuffle order in O(1), and removes a redundant post-scan library sort.",
+      "Updates the Linux archive, AUR package, and stable Nix installation to 1.4.2.",
+    ],
+  },
+  {
     version: "1.4.1",
     date: "21 November 2026",
     label: "Resilience and a smaller binary",
